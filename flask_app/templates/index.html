@@ -1,0 +1,271 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <title>Sign Language Translator</title>
+</head>
+<body>
+  <h1>Sign Language Translator App</h1>
+
+  <h2>Static Sign (Image)</h2>
+  <form id="static-form" enctype="multipart/form-data">
+    <input type="file" name="image" accept="image/*" required>
+    <button type="submit">Translate Image</button>
+  </form>
+  <p id="static-result"></p>
+
+  <h2>Dynamic Sign (Video)</h2>
+  <form id="dynamic-form" enctype="multipart/form-data">
+    <input type="file" name="video" accept="video/*" required>
+    <button type="submit">Translate Video</button>
+  </form>
+  <p id="dynamic-result"></p>
+
+  <script>
+    document.getElementById('static-form').onsubmit = async function(e) {
+      e.preventDefault();
+      let formData = new FormData(this);
+      const response = await fetch('/predict_static', { method: 'POST', body: formData });
+      const result = await response.json();
+      if(response.ok) {
+        document.getElementById('static-result').textContent = 'Prediction: ' + result.prediction;
+      } else {
+        document.getElementById('static-result').textContent = 'Error: ' + result.error;
+      }
+    };
+
+    document.getElementById('dynamic-form').onsubmit = async function(e) {
+      e.preventDefault();
+      let formData = new FormData(this);
+      const response = await fetch('/predict_dynamic', { method: 'POST', body: formData });
+      const result = await response.json();
+      if(response.ok) {
+        document.getElementById('dynamic-result').textContent = 'Prediction: ' + result.prediction;
+      } else {
+        document.getElementById('dynamic-result').textContent = 'Error: ' + result.error;
+      }
+    };
+  </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign-to-Text Translation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        .msg-enter { animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+    </style>
+    <meta name="color-scheme" content="light dark">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><text y='0.9em' font-size='200'>🤟</text></svg>">
+    <meta name="description" content="Chat-style Sign-to-Text translator">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="flex h-screen">
+        <aside class="hidden md:flex w-72 bg-white border-r border-gray-200 p-4 flex-col">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="text-2xl">🤟</div>
+                <div class="font-semibold">Sign-to-Text</div>
+            </div>
+            <div class="text-xs text-gray-500 mb-2">History (coming soon)</div>
+            <div class="flex-1 overflow-y-auto space-y-2 text-sm text-gray-500">
+                <div class="p-3 rounded-lg bg-gray-50">Your past translations will appear here.</div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col">
+            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid fa-hands"></i></div>
+                    <div>
+                        <div class="font-semibold">Sign-to-Text</div>
+                        <div class="text-xs text-gray-500">Image/Video → English text</div>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-400">Powered by your models</div>
+            </header>
+
+            <section id="chat" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div class="flex justify-center">
+                    <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Start a translation by tapping the camera</div>
+                </div>
+            </section>
+
+            <footer class="px-3 py-3 bg-white border-t border-gray-200">
+                <div class="max-w-3xl mx-auto flex items-center gap-2">
+                    <input id="text-input" type="text" class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="Text-to-sign (coming soon)" disabled>
+                    <button id="camera-btn" class="w-11 h-11 rounded-full bg-emerald-500 text-white grid place-items-center hover:bg-emerald-600" title="Open camera">
+                        <i class="fa-solid fa-camera"></i>
+                    </button>
+                    <input id="file-input" type="file" accept="image/*,video/*" class="hidden">
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
+        <div class="bg-white w-full max-w-md rounded-xl overflow-hidden shadow-xl">
+            <div class="px-4 py-3 border-b flex items-center justify-between">
+                <div class="font-semibold">Capture</div>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 space-y-3">
+                <video id="cam" class="w-full rounded-lg bg-black" autoplay playsinline muted></video>
+                <canvas id="canvas" class="hidden"></canvas>
+                <div class="flex gap-2">
+                    <button id="snap" class="flex-1 bg-emerald-500 text-white rounded-md py-2 hover:bg-emerald-600"><i class="fa-solid fa-camera"></i> <span class="ml-1">Image</span></button>
+                    <button id="rec" class="flex-1 bg-emerald-100 text-emerald-700 rounded-md py-2 hover:bg-emerald-200"><i class="fa-solid fa-video"></i> <span class="ml-1">Record</span></button>
+                </div>
+                <div class="text-xs text-gray-500">Tip: keep signs centered and well-lit.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const cameraBtn = document.getElementById('camera-btn');
+        const fileInput = document.getElementById('file-input');
+        const modal = document.getElementById('camera-modal');
+        const closeModal = document.getElementById('close-modal');
+        const videoEl = document.getElementById('cam');
+        const canvas = document.getElementById('canvas');
+        const snapBtn = document.getElementById('snap');
+        const recBtn = document.getElementById('rec');
+
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let chunks = [];
+
+        function addBubble(text, who='app') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex ' + (who === 'user' ? 'justify-end' : 'justify-start');
+            const bubble = document.createElement('div');
+            bubble.className = (who === 'user')
+                ? 'max-w-[80%] bg-emerald-100 text-emerald-900 px-3 py-2 rounded-2xl rounded-tr-sm shadow'
+                : 'max-w-[80%] bg-white text-gray-900 px-3 py-2 rounded-2xl rounded-tl-sm shadow';
+            bubble.textContent = text;
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function addMediaBubble(file, who='user') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex ' + (who === 'user' ? 'justify-end' : 'justify-start');
+            const bubble = document.createElement('div');
+            bubble.className = (who === 'user')
+                ? 'max-w-[80%] bg-emerald-100 text-emerald-900 p-2 rounded-2xl rounded-tr-sm shadow'
+                : 'max-w-[80%] bg-white text-gray-900 p-2 rounded-2xl rounded-tl-sm shadow';
+
+            const url = URL.createObjectURL(file);
+            if (file.type.startsWith('image')) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'image';
+                img.className = 'rounded-lg max-h-64 object-contain';
+                bubble.appendChild(img);
+            } else if (file.type.startsWith('video')) {
+                const vid = document.createElement('video');
+                vid.src = url;
+                vid.controls = true;
+                vid.playsInline = true;
+                vid.muted = true;
+                vid.className = 'rounded-lg max-h-64';
+                bubble.appendChild(vid);
+            } else {
+                bubble.textContent = 'Unsupported file';
+            }
+
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function sendFile(file) {
+            addMediaBubble(file, 'user');
+            const form = new FormData();
+            form.append('file', file);
+            try {
+                const res = await fetch('/predict', { method: 'POST', body: form });
+                const data = await res.json();
+                if (res.ok) {
+                    addBubble(data.prediction || 'No prediction');
+                } else {
+                    addBubble(data.error || 'Error');
+                }
+            } catch (e) {
+                addBubble(String(e));
+            }
+        }
+
+        cameraBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) sendFile(file);
+            fileInput.value = '';
+        });
+
+        // Optional: in-page camera modal capture
+        async function openCamera() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoEl.srcObject = mediaStream;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } catch (e) {
+                alert('Camera access denied');
+            }
+        }
+
+        function closeCamera() {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(t => t.stop());
+                mediaStream = null;
+            }
+        }
+
+        closeModal.addEventListener('click', closeCamera);
+
+        snapBtn.addEventListener('click', async () => {
+            if (!mediaStream) await openCamera();
+            const track = mediaStream.getVideoTracks()[0];
+            const settings = track.getSettings();
+            canvas.width = settings.width || 640;
+            canvas.height = settings.height || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob((blob) => { if (blob) sendFile(new File([blob], 'capture.jpg', { type: 'image/jpeg' })); }, 'image/jpeg');
+        });
+
+        recBtn.addEventListener('click', async () => {
+            if (!mediaStream) await openCamera();
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                recBtn.innerHTML = '<i class="fa-solid fa-video"></i> <span class="ml-1">Record</span>';
+                return;
+            }
+            chunks = [];
+            mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                sendFile(new File([blob], 'capture.webm', { type: 'video/webm' }));
+            };
+            mediaRecorder.start();
+            recBtn.innerHTML = '<i class="fa-solid fa-stop"></i> <span class="ml-1">Stop</span>';
+            setTimeout(() => { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 5000);
+        });
+    </script>
+</body>
+</html>

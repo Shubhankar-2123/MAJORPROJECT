@@ -1,0 +1,30 @@
+project_root/
+│
+├─ data/                  # Raw dataset
+│   ├─ static/            # Static images (alphabets, words)
+│   │   ├─ A/
+│   │   ├─ B/
+│   │   └─ Good/
+│   └─ dynamic/           # Dynamic videos (sentences)
+│       ├─ Hello/
+│       └─ How_are_you/
+│
+├─ data_keypoints/        # Keypoints extracted
+│   ├─ all_keypoints.csv
+│   ├─ static_keypoints.csv
+│   └─ dynamic_keypoints.csv
+│
+├─ scripts/               # All Python scripts
+│   ├─ extract_keypoints.py      # Combined images + videos
+│   ├─ visualize_keypoints.py    # Optional visualization
+│   ├─ preprocess_data.py        # CSV → X_train, y_train, etc.
+│   ├─ train_static_model.py     # CNN for static data
+│   └─ train_dynamic_model.py    # CNN+LSTM for dynamic sequences
+│
+├─ models/                # Saved trained models
+│   ├─ static_model.pkl
+│   └─ dynamic_model.pkl
+│
+├─ notebooks/             # Optional Jupyter notebooks for testing/visualization
+│
+└─ requirements.txt       # Python dependencies

@@ -1,0 +1,19 @@
+# Virtual environment
+mp-env/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Large datasets or archives
+*.zip
+*.npy
+
+# Python caches
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+data/

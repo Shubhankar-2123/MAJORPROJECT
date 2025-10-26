@@ -1,9 +1,11 @@
+Flask
+numpy
 opencv-python
 mediapipe
-numpy
-pandas
 torch
-torchvision
-skorch
-pygame
-streamlit
+joblib
+scikit-learn
+pandas
+tqdm
+rapidfuzz
+requests

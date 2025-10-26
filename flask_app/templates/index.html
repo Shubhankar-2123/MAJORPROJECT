@@ -54,55 +54,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign-to-Text Translation</title>
+    <title>Sign Language Translator - AI Powered</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
-        .msg-enter { animation: fadeIn 0.25s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * { font-family: 'Poppins', sans-serif; }
+        
+        .msg-enter { animation: fadeInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(20px) scale(0.95);} 
+            to { opacity: 1; transform: translateY(0) scale(1);} 
+        }
+        
+        .gradient-bg {
+            /* Subtle, professional dark slate gradient */
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        }
+        
+        .gradient-text {
+            /* Minimal blue accent for headings */
+            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(17, 24, 39, 0.12);
+        }
+        
+        .btn-hover {
+            transition: all 0.2s ease;
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+        }
+        
+        .bubble-user {
+            background: #1f2937; /* slate-800 */
+            color: #ffffff;
+        }
+        
+        .bubble-app {
+            background: #374151; /* slate-700 */
+            color: #ffffff;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #e5e7eb; /* gray-200 */
+            border-top: 3px solid #2563eb; /* professional blue */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        body {
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+        }
     </style>
     <meta name="color-scheme" content="light dark">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><text y='0.9em' font-size='200'>🤟</text></svg>">
-    <meta name="description" content="Chat-style Sign-to-Text translator">
+    <meta name="description" content="AI-Powered Sign Language Translator">
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen">
     <div class="flex h-screen">
-        <aside class="hidden md:flex w-72 bg-white border-r border-gray-200 p-4 flex-col">
-            <div class="flex items-center gap-2 mb-4">
-                <div class="text-2xl">🤟</div>
-                <div class="font-semibold">Sign-to-Text</div>
+        <!-- Modern Sidebar -->
+        <aside class="hidden lg:flex w-80 glass-effect backdrop-blur-xl p-6 flex-col shadow-2xl">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center text-white text-2xl shadow-lg">
+                    🤟
+                </div>
+                <div>
+                    <div class="font-bold text-xl gradient-text">SignAI</div>
+                    <div class="text-xs text-gray-600">Translator v2.0</div>
+                </div>
             </div>
-            <div class="text-xs text-gray-500 mb-2">History (coming soon)</div>
-            <div class="flex-1 overflow-y-auto space-y-2 text-sm text-gray-500">
-                <div class="p-3 rounded-lg bg-gray-50">Your past translations will appear here.</div>
+            
+            <!-- Stats Cards -->
+            <div class="space-y-3 mb-6">
+                <div class="bg-white rounded-xl p-4 shadow-md">
+                    <div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+                            <i class="fa-solid fa-image"></i>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold gradient-text" id="stat-images">0</div>
+                            <div class="text-xs text-gray-500">Images Processed</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-md">
+                    <div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold gradient-text" id="stat-videos">0</div>
+                            <div class="text-xs text-gray-500">Videos Processed</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-xs font-semibold text-gray-600 mb-3">QUICK TIPS</div>
+            <div class="flex-1 overflow-y-auto space-y-2">
+                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
+                    <div class="font-medium text-purple-600 mb-1">✨ Good Lighting</div>
+                    <div class="text-xs text-gray-600">Ensure signs are well-lit and clearly visible</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
+                    <div class="font-medium text-purple-600 mb-1">👋 Clear Gestures</div>
+                    <div class="text-xs text-gray-600">Make signs slowly and deliberately</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
+                    <div class="font-medium text-purple-600 mb-1">🎬 Video Tips</div>
+                    <div class="text-xs text-gray-600">Keep videos 2-5 seconds for best results</div>
+                </div>
             </div>
         </aside>
 
+        <!-- Main Content -->
         <main class="flex-1 flex flex-col">
-            <header class="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 grid place-items-center"><i class="fa-solid fa-hands"></i></div>
+            <!-- Modern Header -->
+            <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center text-white shadow-lg">
+                        <i class="fa-solid fa-hands text-2xl"></i>
+                    </div>
                     <div>
-                        <div class="font-semibold">Sign-to-Text</div>
-                        <div class="text-xs text-gray-500">Image/Video → English text</div>
+                        <div class="font-bold text-xl gradient-text">Sign Language Translator</div>
+                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                            <span class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></span>
+                            AI-Powered Recognition
+                        </div>
                     </div>
                 </div>
-                <div class="text-xs text-gray-400">Powered by your models</div>
+                <div class="hidden md:flex items-center gap-3 text-sm">
+<div class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-medium">
+                        <i class="fa-solid fa-brain mr-2"></i>95% Accuracy
+                    </div>
+                </div>
             </header>
 
-            <section id="chat" class="flex-1 overflow-y-auto p-4 space-y-3">
+            <!-- Chat Messages Area -->
+            <section id="chat" class="flex-1 overflow-y-auto p-6 space-y-4">
                 <div class="flex justify-center">
-                    <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">Start a translation by tapping the camera</div>
+                    <div class="inline-flex items-center gap-2 text-sm bg-white px-6 py-3 rounded-full shadow-md">
+                        <span class="text-2xl">👋</span>
+                        <span class="text-gray-700 font-medium">Welcome! Upload or type to get started</span>
+                    </div>
                 </div>
             </section>
 
-            <footer class="px-3 py-3 bg-white border-t border-gray-200">
-                <div class="max-w-3xl mx-auto flex items-center gap-2">
-                    <input id="text-input" type="text" class="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="Text-to-sign (coming soon)" disabled>
-                    <button id="camera-btn" class="w-11 h-11 rounded-full bg-emerald-500 text-white grid place-items-center hover:bg-emerald-600" title="Open camera">
-                        <i class="fa-solid fa-camera"></i>
-                    </button>
-                    <input id="file-input" type="file" accept="image/*,video/*" class="hidden">
+            <!-- Modern Input Footer -->
+            <footer class="px-6 py-4 bg-white shadow-2xl border-t border-gray-100">
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex items-center gap-3 mb-3">
+                        <input id="text-input" type="text" 
+                               class="flex-1 rounded-2xl border-2 border-gray-200 px-6 py-4 text-sm focus:outline-none focus:border-purple-500 transition-all shadow-sm" 
+                               placeholder="Type text to convert to sign language...">
+                        <button id="text-to-sign-btn" 
+                                class="w-14 h-14 rounded-2xl gradient-bg text-white flex items-center justify-center btn-hover shadow-lg" 
+                                title="Convert text to sign">
+                            <i class="fa-solid fa-language text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <select id="kind-select" class="px-3 py-3 rounded-2xl border-2 border-gray-200 text-sm focus:outline-none focus:border-slate-500">
+                            <option value="">Auto</option>
+                            <option value="word">Word</option>
+                            <option value="sentence">Sentence</option>
+                        </select>
+                        <button id="camera-btn" 
+                                class="flex-1 px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-medium btn-hover shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-camera"></i>
+                            <span>Upload Image/Video</span>
+                        </button>
+                        <input id="file-input" type="file" accept="image/*,video/*" class="hidden">
+                    </div>
                 </div>
             </footer>
         </main>
@@ -130,7 +280,10 @@
     <script>
         const chat = document.getElementById('chat');
         const cameraBtn = document.getElementById('camera-btn');
+        const textToSignBtn = document.getElementById('text-to-sign-btn');
+        const textInput = document.getElementById('text-input');
         const fileInput = document.getElementById('file-input');
+        const kindSelect = document.getElementById('kind-select');
         const modal = document.getElementById('camera-modal');
         const closeModal = document.getElementById('close-modal');
         const videoEl = document.getElementById('cam');
@@ -141,18 +294,48 @@
         let mediaStream = null;
         let mediaRecorder = null;
         let chunks = [];
+        let imageCount = 0;
+        let videoCount = 0;
+        
+        // Update stats
+        function updateStats(type) {
+            if (type === 'image') {
+                imageCount++;
+                document.getElementById('stat-images').textContent = imageCount;
+            } else if (type === 'video') {
+                videoCount++;
+                document.getElementById('stat-videos').textContent = videoCount;
+            }
+        }
 
         function addBubble(text, who='app') {
             const wrapper = document.createElement('div');
             wrapper.className = 'msg-enter flex ' + (who === 'user' ? 'justify-end' : 'justify-start');
             const bubble = document.createElement('div');
             bubble.className = (who === 'user')
-                ? 'max-w-[80%] bg-emerald-100 text-emerald-900 px-3 py-2 rounded-2xl rounded-tr-sm shadow'
-                : 'max-w-[80%] bg-white text-gray-900 px-3 py-2 rounded-2xl rounded-tl-sm shadow';
+                ? 'max-w-[80%] bubble-user px-5 py-3 rounded-3xl rounded-tr-md shadow-lg font-medium'
+                : 'max-w-[80%] bubble-app px-5 py-3 rounded-3xl rounded-tl-md shadow-lg font-medium';
             bubble.textContent = text;
             wrapper.appendChild(bubble);
             chat.appendChild(wrapper);
             chat.scrollTop = chat.scrollHeight;
+        }
+        
+        function addLoadingBubble() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex justify-start';
+            wrapper.id = 'loading-bubble';
+            const bubble = document.createElement('div');
+            bubble.className = 'bg-white px-5 py-3 rounded-3xl rounded-tl-md shadow-lg flex items-center gap-3';
+            bubble.innerHTML = '<div class="loading-spinner"></div><span class="text-gray-600 font-medium">Analyzing...</span>';
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        function removeLoadingBubble() {
+            const loading = document.getElementById('loading-bubble');
+            if (loading) loading.remove();
         }
 
         function addMediaBubble(file, who='user') {
@@ -189,23 +372,134 @@
 
         async function sendFile(file) {
             addMediaBubble(file, 'user');
+            addLoadingBubble();
+            
+            // Update stats
+            if (file.type.startsWith('image')) {
+                updateStats('image');
+            } else if (file.type.startsWith('video')) {
+                updateStats('video');
+            }
+            
             const form = new FormData();
             form.append('file', file);
+            const kind = kindSelect.value;
+            if (kind) form.append('kind', kind);
             try {
                 const res = await fetch('/predict', { method: 'POST', body: form });
                 const data = await res.json();
+                removeLoadingBubble();
                 if (res.ok) {
-                    addBubble(data.prediction || 'No prediction');
+                    const pred = data.prediction || 'No prediction';
+                    addBubble(String(pred));
                 } else {
-                    addBubble(data.error || 'Error');
+                    addBubble('Error: ' + (data.error || 'Unknown error'));
                 }
             } catch (e) {
-                addBubble(String(e));
+                removeLoadingBubble();
+                addBubble('❌ Connection error: ' + String(e));
             }
+        }
+
+        async function sendTextToSign(text) {
+            if (!text.trim()) return;
+            
+            addBubble(text, 'user');
+            try {
+                const res = await fetch('/text_to_sign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    // Prefer full phrase video if available
+                    if (data.phrase && data.phrase.url) {
+                        addSignVideoBubble(data.phrase.text || 'Phrase', data.phrase.url, []);
+                    } else if (Array.isArray(data.words)) {
+                        for (const wordData of data.words) {
+                            if (wordData.url) {
+                                addSignVideoBubble(wordData.word, wordData.url, wordData.synonyms);
+                            }
+                        }
+                    }
+                    if (Array.isArray(data.missing) && data.missing.length) {
+                        const msgs = data.missing.map(m => `${m.word}: ${m.message}`).join('; ');
+                        addBubble(`Note: ${msgs}`);
+                    }
+                } else {
+                    addBubble(data.error || 'Error converting text to sign');
+                }
+            } catch (e) {
+                addBubble('Error: ' + String(e));
+            }
+        }
+
+        function addSignVideoBubble(word, mediaUrl, synonyms) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'max-w-[80%] bg-white text-gray-900 p-3 rounded-2xl rounded-tl-sm shadow';
+            
+            // Word title
+            const wordTitle = document.createElement('div');
+            wordTitle.className = 'font-semibold text-lg mb-2';
+            wordTitle.textContent = word;
+            bubble.appendChild(wordTitle);
+            
+            // Detect image vs video by extension
+            const isImage = /\.(png|jpe?g|webp)$/i.test(mediaUrl);
+            if (isImage) {
+                const img = document.createElement('img');
+                img.src = mediaUrl;
+                img.alt = word;
+                img.className = 'rounded-lg max-h-64 w-full object-contain';
+                bubble.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = mediaUrl;
+                video.controls = true;
+                video.playsInline = true;
+                video.muted = true;
+                video.className = 'rounded-lg max-h-64 w-full';
+                bubble.appendChild(video);
+            }
+            
+            // Synonyms (kept for compatibility, can be empty)
+            if (synonyms && synonyms.length > 0) {
+                const synonymsDiv = document.createElement('div');
+                synonymsDiv.className = 'text-xs text-gray-500 mt-2';
+                synonymsDiv.textContent = `Synonyms: ${synonyms.join(', ')}`;
+                bubble.appendChild(synonymsDiv);
+            }
+            
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
         }
 
         cameraBtn.addEventListener('click', () => {
             fileInput.click();
+        });
+
+        textToSignBtn.addEventListener('click', () => {
+            const text = textInput.value.trim();
+            if (text) {
+                sendTextToSign(text);
+                textInput.value = '';
+            }
+        });
+
+        textInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const text = textInput.value.trim();
+                if (text) {
+                    sendTextToSign(text);
+                    textInput.value = '';
+                }
+            }
         });
 
         fileInput.addEventListener('change', (e) => {

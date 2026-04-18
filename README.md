@@ -14,7 +14,31 @@ This repository hosts a Flask-based application and supporting scripts for stati
   - `pip install -r requirements.txt`
 - Run the web app
   - `python flask_app/app.py`
-  - Opens on `http://127.0.0.1:5000` (host `0.0.0.0`, port `5000`)
+  - Opens on `http://127.0.0.1:5000` (login page)
+
+User manual
+- See [docs/USER_MANUAL.md](docs/USER_MANUAL.md) for a step-by-step guide to using the app.
+
+Deployment verification
+- Follow [docs/DEPLOYMENT_VERIFICATION.md](docs/DEPLOYMENT_VERIFICATION.md) to validate a clean setup.
+
+## Deployment / Portability
+
+The app is now configured to run from environment variables instead of machine-specific paths.
+
+Recommended environment values:
+- `DATA_DIR` - root folder for datasets and media, defaults to `data/`
+- `MODELS_DIR` - root folder for model artifacts, defaults to `models/`
+- `USER_SIGNS_DIR` - custom sign storage, defaults to `data/custom_signs/`
+- `SECRET_KEY` - Flask session secret
+- `MAX_FRAMES`, `WORD_CONF_THRESHOLD`, `SENT_CONF_THRESHOLD`, `DYNAMIC_DEFAULT_THRESHOLD` - runtime tuning knobs
+
+For local development, copy `.env.example` to `.env` and adjust the values as needed. For CI/CD or server deployment, set the same variables in the platform environment instead of editing code.
+
+Deployment packaging guidance:
+- Keep `data/dynamic*` and `data/Frames_Word_Level_*` if you want the dictionary and media lookup to work.
+- Exclude `uploads/`, `flask_app/uploads/`, `.venv/`, `venv/`, `__pycache__/`, and notebook checkpoints from deploy bundles.
+- Do not ship local-only databases such as `data/app.db` unless that database is intentionally required.
 
 Environment knobs
 - `DYNAMIC_DEFAULT_THRESHOLD` (default `0.60`) – base confidence for dynamic models
@@ -75,7 +99,16 @@ Notes
 Base URL: `http://127.0.0.1:5000`
 
 - GET `/`
-  - Renders `templates/index.html`.
+  - Redirects to `/login`.
+
+- GET `/login`
+  - Renders `templates/login.html`.
+
+- GET `/app`
+  - Renders `templates/index.html` (requires session).
+
+- GET `/dashboard/`
+  - Renders `templates/dashboard.html` (requires session).
 
 - GET `/available_words`
   - Scans `data/dynamic*` for word folders containing videos.
@@ -86,11 +119,20 @@ Base URL: `http://127.0.0.1:5000`
   - Returns `{ "prediction": <label> }` on success.
   - On low confidence or errors, returns `{ "prediction": "unable to recognize" }`.
   - Internals: uses scaler and static model under `models/static images/`.
+  - Requires authenticated session.
 
 - POST `/predict_dynamic`
   - Form-data: `video` (file)
   - Returns `{ "prediction": <label> }` if confidence clears the per-model threshold.
   - Otherwise `{ "prediction": "unable to recognize" }`.
+  - Requires authenticated session.
+
+- POST `/predict`
+  - Unified image/video prediction with translation + TTS.
+  - Requires authenticated session.
+
+- GET `/api/session`
+  - Returns `{ logged_in: bool, user: { id, username } | null }`.
 
 - POST `/debug/static_preprocess_check`
   - Form-data: `image` (file)
@@ -102,10 +144,10 @@ Base URL: `http://127.0.0.1:5000`
 
 ### Example Requests
 
-- Static prediction
+- Static prediction (after login)
   - `curl -X POST -F "image=@path/to/file.jpg" http://127.0.0.1:5000/predict_static`
 
-- Dynamic prediction
+- Dynamic prediction (after login)
   - `curl -X POST -F "video=@path/to/file.mp4" http://127.0.0.1:5000/predict_dynamic`
 
 - Available words

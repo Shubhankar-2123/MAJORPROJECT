@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignAI - Sign Up</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { font-family: var(--font-family); }
+        .title-font { font-family: inherit; }
+        .hero-bg {
+            background: #F5F7FA;
+        }
+        .glass {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen hero-bg flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl fade-in">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center mb-4">
+                <div class="w-16 h-16 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-4xl shadow-lg">🤟</div>
+            </div>
+            <h1 class="title-font text-4xl font-bold text-slate-900 mb-2">Join SignAI</h1>
+            <p class="text-slate-600">Create your account and start translating sign language</p>
+        </div>
+
+        <!-- Form Card -->
+        <div class="glass rounded-2xl shadow-xl p-8">
+            <form id="signup-form" class="space-y-5">
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="full_name" 
+                        name="full_name"
+                        placeholder="John Doe"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        required
+                    />
+                    <p class="text-xs text-red-500 mt-1 hidden" id="full_name-error"></p>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        placeholder="john@example.com"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        required
+                    />
+                    <p class="text-xs text-blue-600 mt-1 hidden" id="email-success">✓ Email available</p>
+                    <p class="text-xs text-red-500 mt-1 hidden" id="email-error"></p>
+                </div>
+
+                <!-- Username -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Username *</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username"
+                        placeholder="johndoe123"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        maxlength="20"
+                        required
+                    />
+                    <p class="text-xs text-slate-500 mt-1">3-20 characters, letters, numbers, underscores only</p>
+                    <p class="text-xs text-blue-600 mt-1 hidden" id="username-success">✓ Username available</p>
+                    <p class="text-xs text-red-500 mt-1 hidden" id="username-error"></p>
+                </div>
+
+                <!-- Grid: DOB & Gender -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Date of Birth -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Date of Birth</label>
+                        <input 
+                            type="date" 
+                            id="dob" 
+                            name="dob"
+                            class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        />
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Gender</label>
+                        <select 
+                            id="gender" 
+                            name="gender"
+                            class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition form-select"
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Mobile Number -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Mobile Number *</label>
+                    <div class="flex">
+                        <div class="px-4 py-3 bg-slate-100 rounded-l-lg border-2 border-r-0 border-slate-200 text-slate-600 font-medium flex items-center">
+                            +91
+                        </div>
+                        <input 
+                            type="tel" 
+                            id="mobile" 
+                            name="mobile"
+                            placeholder="9876543210"
+                            maxlength="10"
+                            class="flex-1 px-4 py-3 rounded-r-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                            required
+                        />
+                    </div>
+                    <p class="text-xs text-slate-500 mt-1">10 digits</p>
+                    <p class="text-xs text-red-500 mt-1 hidden" id="mobile-error"></p>
+                </div>
+
+                <!-- Disability -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Any Disability / Special Needs</label>
+                    <input 
+                        type="text" 
+                        id="disability" 
+                        name="disability"
+                        placeholder="(Optional) e.g., Deaf, Hard of Hearing, etc."
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                    />
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password"
+                        placeholder="Enter secure password"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        required
+                    />
+                    <div class="text-xs text-slate-500 mt-2 space-y-1">
+                        <p>✓ At least 8 characters</p>
+                        <p>✓ At least one uppercase letter</p>
+                        <p>✓ At least one number</p>
+                    </div>
+                    <p class="text-xs text-red-500 mt-1 hidden" id="password-error"></p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Confirm Password *</label>
+                    <input 
+                        type="password" 
+                        id="confirm_password" 
+                        name="confirm_password"
+                        placeholder="Re-enter password"
+                        class="w-full px-4 py-3 rounded-lg border-2 border-slate-200 focus:border-blue-400 focus:outline-none transition"
+                        required
+                    />
+                    <p class="text-xs text-red-500 mt-1 hidden" id="confirm_password-error"></p>
+                </div>
+
+                <!-- Error Messages -->
+                <div id="signup-error" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded">
+                    <p class="text-red-700 text-sm"></p>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg hover:shadow-lg transition duration-200"
+                    id="submit-btn"
+                >
+                    Create Account
+                </button>
+
+                <!-- Login Link -->
+                <p class="text-center text-slate-600 text-sm">
+                    Already have an account? 
+                    <a href="/auth/login" class="text-blue-600 font-bold hover:text-blue-700">Sign In</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="/" class="text-slate-600 hover:text-slate-900 text-sm transition">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signup-form');
+        const submitBtn = document.getElementById('submit-btn');
+        let validationResults = {
+            username: false,
+            email: false,
+            password: false,
+            confirm_password: false,
+            full_name: false,
+            mobile: false
+        };
+
+        // Username availability check
+        document.getElementById('username').addEventListener('blur', async (e) => {
+            const username = e.target.value.trim();
+            const errorEl = document.getElementById('username-error');
+            const successEl = document.getElementById('username-success');
+            
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
+            
+            if (!username) {
+                validationResults.username = false;
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+                errorEl.textContent = 'Username must be 3-20 characters (letters, numbers, underscores only)';
+                errorEl.classList.remove('hidden');
+                validationResults.username = false;
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth/check-username', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username })
+                });
+                const data = await res.json();
+                if (data.available) {
+                    successEl.classList.remove('hidden');
+                    validationResults.username = true;
+                } else {
+                    errorEl.textContent = 'Username already taken';
+                    errorEl.classList.remove('hidden');
+                    validationResults.username = false;
+                }
+            } catch (e) {
+                errorEl.textContent = 'Error checking username availability';
+                errorEl.classList.remove('hidden');
+                validationResults.username = false;
+            }
+            updateFormState();
+        });
+
+        // Email availability check
+        document.getElementById('email').addEventListener('blur', async (e) => {
+            const email = e.target.value.trim();
+            const errorEl = document.getElementById('email-error');
+            const successEl = document.getElementById('email-success');
+            
+            errorEl.classList.add('hidden');
+            successEl.classList.add('hidden');
+            
+            if (!email) {
+                validationResults.email = false;
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                errorEl.textContent = 'Invalid email format';
+                errorEl.classList.remove('hidden');
+                validationResults.email = false;
+                return;
+            }
+
+            try {
+                const res = await fetch('/auth/check-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.available) {
+                    successEl.classList.remove('hidden');
+                    validationResults.email = true;
+                } else {
+                    errorEl.textContent = 'Email already registered';
+                    errorEl.classList.remove('hidden');
+                    validationResults.email = false;
+                }
+            } catch (e) {
+                errorEl.textContent = 'Error checking email availability';
+                errorEl.classList.remove('hidden');
+                validationResults.email = false;
+            }
+            updateFormState();
+        });
+
+        // Password validation
+        document.getElementById('password').addEventListener('input', (e) => {
+            const password = e.target.value;
+            const errorEl = document.getElementById('password-error');
+            errorEl.classList.add('hidden');
+
+            if (!password) {
+                validationResults.password = false;
+            } else if (password.length < 8) {
+                errorEl.textContent = 'Password must be at least 8 characters';
+                errorEl.classList.remove('hidden');
+                validationResults.password = false;
+            } else if (!/[A-Z]/.test(password)) {
+                errorEl.textContent = 'Password must contain at least one uppercase letter';
+                errorEl.classList.remove('hidden');
+                validationResults.password = false;
+            } else if (!/\d/.test(password)) {
+                errorEl.textContent = 'Password must contain at least one number';
+                errorEl.classList.remove('hidden');
+                validationResults.password = false;
+            } else {
+                validationResults.password = true;
+            }
+            updateFormState();
+        });
+
+        // Confirm password validation
+        document.getElementById('confirm_password').addEventListener('input', (e) => {
+            const password = document.getElementById('password').value;
+            const confirm = e.target.value;
+            const errorEl = document.getElementById('confirm_password-error');
+            errorEl.classList.add('hidden');
+
+            if (!confirm) {
+                validationResults.confirm_password = false;
+            } else if (password !== confirm) {
+                errorEl.textContent = 'Passwords do not match';
+                errorEl.classList.remove('hidden');
+                validationResults.confirm_password = false;
+            } else {
+                validationResults.confirm_password = true;
+            }
+            updateFormState();
+        });
+
+        // Full name validation
+        document.getElementById('full_name').addEventListener('blur', (e) => {
+            const name = e.target.value.trim();
+            const errorEl = document.getElementById('full_name-error');
+            errorEl.classList.add('hidden');
+
+            if (!name) {
+                validationResults.full_name = false;
+            } else if (name.length < 2) {
+                errorEl.textContent = 'Full name must be at least 2 characters';
+                errorEl.classList.remove('hidden');
+                validationResults.full_name = false;
+            } else {
+                validationResults.full_name = true;
+            }
+            updateFormState();
+        });
+
+        // Mobile validation
+        document.getElementById('mobile').addEventListener('blur', (e) => {
+            const mobile = e.target.value.trim();
+            const errorEl = document.getElementById('mobile-error');
+            errorEl.classList.add('hidden');
+
+            if (!mobile) {
+                validationResults.mobile = false;
+            } else if (!/^\d{10}$/.test(mobile)) {
+                errorEl.textContent = 'Mobile number must be exactly 10 digits';
+                errorEl.classList.remove('hidden');
+                validationResults.mobile = false;
+            } else {
+                validationResults.mobile = true;
+            }
+            updateFormState();
+        });
+
+        function updateFormState() {
+            const allValid = Object.values(validationResults).every(v => v);
+            submitBtn.disabled = !allValid;
+            submitBtn.classList.toggle('opacity-50', !allValid);
+            submitBtn.classList.toggle('cursor-not-allowed', !allValid);
+        }
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating account...';
+
+            const formData = {
+                full_name: document.getElementById('full_name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                dob: document.getElementById('dob').value || null,
+                gender: document.getElementById('gender').value || null,
+                mobile: document.getElementById('mobile').value.trim(),
+                disability: document.getElementById('disability').value.trim() || null,
+                password: document.getElementById('password').value,
+                confirm_password: document.getElementById('confirm_password').value
+            };
+
+            try {
+                const res = await fetch('/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const data = await res.json();
+                const errorEl = document.getElementById('signup-error');
+
+                if (res.ok && data.success) {
+                    errorEl.classList.add('hidden');
+                    // Redirect to login
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 1500);
+                } else {
+                    errorEl.querySelector('p').textContent = data.error || 'Signup failed';
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Account';
+                }
+            } catch (e) {
+                const errorEl = document.getElementById('signup-error');
+                errorEl.querySelector('p').textContent = 'Error: Could not reach server';
+                errorEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+
+        updateFormState();
+    </script>
+</body>
+</html>

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignAI - Sign Language Translation System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .feature-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+        }
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #F5F7FA 0%, #FFFFFF 100%);
+            padding: 80px 0;
+        }
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), #2563EB);
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+        }
+        .team-section {
+            padding: 88px 0;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(59, 130, 246, 0.14), transparent 30%),
+                radial-gradient(circle at 85% 85%, rgba(14, 165, 233, 0.12), transparent 32%),
+                linear-gradient(180deg, #FFFFFF 0%, #F8FAFF 100%);
+        }
+        .team-subtitle {
+            font-size: 18px;
+            color: #64748B;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 22px;
+            margin-top: 44px;
+        }
+        .team-card {
+            position: relative;
+            padding: 1px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), rgba(59, 130, 246, 0.14));
+            box-shadow: 0 10px 32px rgba(15, 23, 42, 0.08);
+            transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+            animation: teamFadeUp 0.65s ease both;
+        }
+        .team-card:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+        .team-card:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+        .team-card:nth-child(4) {
+            animation-delay: 0.24s;
+        }
+        .team-card:hover {
+            transform: translateY(-8px) scale(1.015);
+            box-shadow: 0 20px 42px rgba(37, 99, 235, 0.2);
+            background: linear-gradient(135deg, #3B82F6, #0EA5E9);
+        }
+        .team-card-inner {
+            height: 100%;
+            border-radius: 19px;
+            padding: 24px;
+            background: #FFFFFF;
+        }
+        .avatar-placeholder {
+            width: 64px;
+            height: 64px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: #FFFFFF;
+            background: linear-gradient(135deg, #2563EB, #0EA5E9);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
+            margin-bottom: 16px;
+        }
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background-color: #EFF6FF;
+            border: 1px solid #DBEAFE;
+            color: #2563EB;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 14px;
+        }
+        .team-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 10px;
+        }
+        .team-description {
+            color: #64748B;
+            font-size: 14px;
+            line-height: 1.65;
+            margin-bottom: 18px;
+            min-height: 72px;
+        }
+        .social-row {
+            display: flex;
+            gap: 10px;
+        }
+        .social-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid #DCE7FB;
+            color: #2563EB;
+            background: #F8FBFF;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+        }
+        .social-btn:hover {
+            background: #2563EB;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+        }
+        .mentor-card {
+            margin-top: 30px;
+            border-radius: 18px;
+            border: 1px solid #DBEAFE;
+            background: linear-gradient(135deg, #F8FBFF, #FFFFFF);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+        }
+        .mentor-title {
+            color: #1E3A8A;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        @keyframes teamFadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                transform: scaleX(0);
+            }
+            to {
+                transform: scaleX(1);
+            }
+        }
+        @media (max-width: 1200px) {
+            .team-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (max-width: 700px) {
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+            .team-description {
+                min-height: auto;
+            }
+        }
+    </style>
+</head>
+<body style="background-color: #F5F7FA;">
+    <!-- Navigation -->
+    <nav class="navbar sticky top-0 z-40" style="background-color: white; border-bottom: 1px solid #E5E7EB;">
+        <div class="container flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">🤟</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div style="font-weight: 600; font-size: 18px; color: #1F2937; line-height: 1.2;">SignAI</div>
+                    <div style="font-size: 12px; color: #9CA3AF; line-height: 1.2;">Sign Language AI</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/auth/login" class="btn btn-outline btn-sm btn-fixed">
+                    Login
+                </a>
+                <a href="/auth/signup" class="btn btn-primary btn-sm btn-fixed">
+                    Sign Up
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center animate-fade-in">
+            <h1 style="font-size: 48px; font-weight: 700; color: #1F2937; margin-bottom: 24px;">Breaking Communication Barriers</h1>
+            <p style="font-size: 20px; color: #6B7280; margin-bottom: 32px; max-width: 800px; margin-left: auto; margin-right: auto; line-height: 1.8;">
+                AI-powered sign language translation that bridges the gap between deaf and hearing communities with cutting-edge recognition technology
+            </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;">
+                <a href="/auth/signup" class="btn btn-primary btn-lg">
+                    Get Started Free <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                </a>
+                <button onclick="document.getElementById('features').scrollIntoView({ behavior: 'smooth' })" class="btn btn-outline btn-lg">
+                    Learn More <i class="fas fa-chevron-down" style="margin-left: 8px;"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section style="padding: 20px 0; background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); border-top: 1px solid #E5E7EB; border-bottom: 1px solid #E5E7EB;">
+        <div class="container text-center">
+            <p style="font-size: 17px; font-weight: 500; color: #334155; max-width: 900px; margin: 0 auto; line-height: 1.7;">
+                Designed for real-time, low-latency translation without requiring specialized hardware.
+            </p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" style="padding: 80px 0; background-color: white;">
+        <div class="container">
+            <div class="text-center mb-16" style="margin-bottom: 64px;">
+                <h2 style="font-size: 42px; font-weight: 700; color: #1F2937; margin-bottom: 16px;">Key Features</h2>
+                <p style="font-size: 18px; color: #6B7280; max-width: 600px; margin-left: auto; margin-right: auto;">Powerful tools to bridge communication gaps and make sign language accessible to everyone</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                <!-- Feature 1 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">📝</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Text → Sign</h3>
+                    <p style="color: #6B7280;">Convert written text into sign language videos instantly</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">🎥</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Sign → Text</h3>
+                    <p style="color: #6B7280;">Record sign language videos and get instant text translation</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">📖</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Dictionary</h3>
+                    <p style="color: #6B7280;">Browse comprehensive sign language dictionary with examples</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">💬</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Real-time Interaction</h3>
+                    <p style="color: #6B7280;">Seamless communication using text, sign, and speech integration</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">✨</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Custom Signs</h3>
+                    <p style="color: #6B7280;">Create and save personalized sign language expressions</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="card feature-card">
+                    <div style="font-size: 40px; margin-bottom: 16px;">🎯</div>
+                    <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">AI Intelligence</h3>
+                    <p style="color: #6B7280;">Powered by MediaPipe-based landmark extraction, MLP for static gesture recognition, and CNN + LSTM for dynamic sequence recognition.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" style="padding: 88px 0; background: linear-gradient(180deg, #F5F7FA 0%, #FFFFFF 100%); position: relative;">
+        <div style="position: absolute; top: 0; right: 0; width: 400px; height: 400px; background: radial-gradient(circle, rgba(59, 130, 246, 0.08), transparent 70%); border-radius: 50%; filter: blur(50px);"></div>
+        <div class="container" style="position: relative; z-index: 1;">
+            <div class="text-center mb-16" style="margin-bottom: 64px;">
+                <h2 style="font-size: 42px; font-weight: 700; color: #0F172A; margin-bottom: 14px;">SignAI at a Glance</h2>
+                <p style="font-size: 18px; color: #64748B; max-width: 700px; margin-left: auto; margin-right: auto;">Real-time ISL translation powered by computer vision and deep learning</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                <!-- Stat 1: Sign Vocabulary -->
+                <div class="card stat-card" style="border-radius: 16px; border: 1px solid #E2E8F0; transition: all 0.3s ease; padding: 0;">
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%;">
+                        <div style="font-size: 40px; font-weight: 700; background: linear-gradient(135deg, #3B82F6, #0EA5E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;">220+</div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">ISL Gestures</h3>
+                        <p style="font-size: 13px; color: #64748B; line-height: 1.6;">220+ ISL gestures (alphabets, numbers, words, and sentences)</p>
+                    </div>
+                </div>
+
+                <!-- Stat 2: AI Models -->
+                <div class="card stat-card" style="border-radius: 16px; border: 1px solid #E2E8F0; transition: all 0.3s ease; padding: 0;">
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%;">
+                        <div style="font-size: 40px; font-weight: 700; background: linear-gradient(135deg, #3B82F6, #0EA5E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;">2</div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">AI Models</h3>
+                        <p style="font-size: 13px; color: #64748B; line-height: 1.6;">Static Model (MediaPipe + NN) and Dynamic Model (CNN + LSTM)</p>
+                    </div>
+                </div>
+
+                <!-- Stat 3: Languages Supported -->
+                <div class="card stat-card" style="border-radius: 16px; border: 1px solid #E2E8F0; transition: all 0.3s ease; padding: 0;">
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%;">
+                        <div style="font-size: 40px; font-weight: 700; background: linear-gradient(135deg, #3B82F6, #0EA5E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;">6</div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">6 Languages Supported</h3>
+                        <p style="font-size: 13px; color: #64748B; line-height: 1.6;">English, Hindi, Marathi, Gujarati, Tamil, Telugu</p>
+                    </div>
+                </div>
+
+                <!-- Stat 4: Static Processing Speed -->
+                <div class="card stat-card" style="border-radius: 16px; border: 1px solid #E2E8F0; transition: all 0.3s ease; padding: 0;">
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%;">
+                        <div style="font-size: 40px; font-weight: 700; background: linear-gradient(135deg, #3B82F6, #0EA5E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;">~0.003 s</div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">Static Speed</h3>
+                        <p style="font-size: 13px; color: #64748B; line-height: 1.6;">Ultra-fast real-time prediction for static gestures</p>
+                    </div>
+                </div>
+
+                <!-- Stat 5: Dynamic Processing Speed -->
+                <div class="card stat-card" style="border-radius: 16px; border: 1px solid #E2E8F0; transition: all 0.3s ease; padding: 0;">
+                    <div style="padding: 24px; display: flex; flex-direction: column; height: 100%;">
+                        <div style="font-size: 40px; font-weight: 700; background: linear-gradient(135deg, #3B82F6, #0EA5E9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 12px;">~1.6 s</div>
+                        <h3 style="font-size: 17px; font-weight: 700; color: #0F172A; margin-bottom: 8px;">Dynamic Speed</h3>
+                        <p style="font-size: 13px; color: #64748B; line-height: 1.6;">Accurate sequence-based gesture recognition</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Guide Section -->
+    <section id="quickstart" style="padding: 80px 0; background-color: white;">
+        <div class="container">
+            <div class="text-center mb-16" style="margin-bottom: 64px;">
+                <h2 style="font-size: 42px; font-weight: 700; color: #1F2937; margin-bottom: 16px;">Get Started in 4 Steps</h2>
+                <p style="font-size: 18px; color: #6B7280; max-width: 600px; margin-left: auto; margin-right: auto;">Begin your sign language journey in minutes</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+                <!-- Step 1 -->
+                <div class="card">
+                    <div class="step-number" style="margin-bottom: 16px;">1</div>
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Access Dashboard</h3>
+                    <p style="color: #6B7280; font-size: 14px;">Sign up and log in to your personalized SignAI dashboard</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="card">
+                    <div class="step-number" style="margin-bottom: 16px;">2</div>
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Choose Your Task</h3>
+                    <p style="color: #6B7280; font-size: 14px;">Select from Text→Sign, Sign recognition, or Dictionary</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="card">
+                    <div class="step-number" style="margin-bottom: 16px;">3</div>
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Process Request</h3>
+                    <p style="color: #6B7280; font-size: 14px;">Our AI handles your request instantly</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="card">
+                    <div class="step-number" style="margin-bottom: 16px;">4</div>
+                    <h3 style="font-size: 18px; font-weight: 600; color: #1F2937; margin-bottom: 12px;">Provide Feedback</h3>
+                    <p style="color: #6B7280; font-size: 14px;">Help us improve with your ratings</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset & Training Section -->
+    <section id="datasets" style="padding: 88px 0; background: linear-gradient(180deg, #F8FAFC 0%, #F0F4F8 100%); position: relative;">
+        <div style="position: absolute; top: -50px; left: 5%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(59, 130, 246, 0.15), transparent 70%); border-radius: 50%; filter: blur(40px);"></div>
+        <div class="container" style="position: relative; z-index: 1;">
+            <div style="text-align: center; margin-bottom: 64px;">
+                <span style="display: inline-block; padding: 8px 16px; background-color: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 999px; color: #2563EB; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px;">Dataset &amp; Model Training</span>
+                <h2 style="font-size: 42px; font-weight: 700; color: #0F172A; margin-bottom: 14px;">Dataset &amp; Training</h2>
+                <p style="font-size: 18px; color: #64748B; max-width: 600px; margin-left: auto; margin-right: auto;">Built on real-world ISL data for accurate and reliable translation</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 28px; margin-bottom: 40px;">
+                <!-- Static Dataset Card -->
+                <div class="card" style="position: relative; overflow: hidden; transition: all 0.35s ease; border-radius: 18px; border: 1px solid #DCE7F5; background: #FFFFFF; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 16px 40px rgba(37, 99, 235, 0.16)'; this.style.borderColor='#DBEAFE';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(15, 23, 42, 0.08)'; this.style.borderColor='#DCE7F5';">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #2563EB, #0EA5E9); transform-origin: left; transform: scaleX(0); animation: slideIn 0.6s ease 0.2s forwards;"></div>
+                    <div style="padding: 28px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="font-size: 36px;">📸</div>
+                            <span style="display: inline-block; padding: 6px 12px; background-color: #F0FAFE; border: 1px solid #A8E6F1; border-radius: 999px; color: #0B5563; font-size: 11px; font-weight: 700; text-transform: uppercase;">Image-Based</span>
+                        </div>
+                        <h3 style="font-size: 22px; font-weight: 700; color: #0F172A; margin-bottom: 20px;">Static Gestures</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Coverage:</strong> Indian Sign Language Alphabets &amp; Numbers</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Data:</strong> 1,000+ samples per gesture</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Input:</strong> Hand landmark coordinates (MediaPipe)</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Model:</strong> Neural Network (MLP)</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; color: #64748B;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Advantage:</strong> High accuracy &amp; fast inference (&lt;50ms)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Dynamic Dataset Card -->
+                <div class="card" style="position: relative; overflow: hidden; transition: all 0.35s ease; border-radius: 18px; border: 1px solid #DCE7F5; background: #FFFFFF; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); cursor: pointer;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 16px 40px rgba(37, 99, 235, 0.16)'; this.style.borderColor='#DBEAFE';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(15, 23, 42, 0.08)'; this.style.borderColor='#DCE7F5';">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0EA5E9, #06B6D4); transform-origin: left; transform: scaleX(0); animation: slideIn 0.6s ease 0.4s forwards;"></div>
+                    <div style="padding: 28px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="font-size: 36px;">🎬</div>
+                            <span style="display: inline-block; padding: 6px 12px; background-color: #F0FAFE; border: 1px solid #A8E6F1; border-radius: 999px; color: #0B5563; font-size: 11px; font-weight: 700; text-transform: uppercase;">Video-Based</span>
+                        </div>
+                        <h3 style="font-size: 22px; font-weight: 700; color: #0F172A; margin-bottom: 20px;">Dynamic Sequences</h3>
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Coverage:</strong> Words, Phrases &amp; Sentences</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Data:</strong> ~5 videos per word (custom recorded)</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Input:</strong> Video frames &amp; sequences</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 14px; color: #64748B;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Model:</strong> CNN + LSTM</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; color: #64748B;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span><strong style="color: #1E293B;">Advantage:</strong> Captures motion &amp; temporal patterns</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Collection &amp; Preprocessing -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin-top: 32px;">
+                <!-- Data Collection Card -->
+                <div class="card" style="position: relative; overflow: hidden; transition: all 0.35s ease; border-radius: 24px; border: 1px solid #DCE7F5; background: #FFFFFF; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); cursor: pointer;" onmouseover="this.style.transform='translateY(-8px) scale(1.01)'; this.style.boxShadow='0 16px 40px rgba(37, 99, 235, 0.16)'; this.style.borderColor='#DBEAFE';" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(15, 23, 42, 0.08)'; this.style.borderColor='#DCE7F5';">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #2563EB, #0EA5E9); transform-origin: left; transform: scaleX(0); animation: slideIn 0.6s ease 0.2s forwards;"></div>
+                    <div style="padding: 28px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="font-size: 36px;">📊</div>
+                            <span style="display: inline-block; padding: 6px 12px; background-color: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 999px; color: #1D4ED8; font-size: 11px; font-weight: 700; text-transform: uppercase;">Data Sources</span>
+                        </div>
+                        <h4 style="font-size: 22px; font-weight: 700; color: #0F172A; margin-bottom: 10px;">Data Collection &amp; Sources</h4>
+                        <p style="color: #64748B; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">Diverse ISL data captured from curated public and custom real-world recordings.</p>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Public ISL datasets &amp; repositories</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Custom recorded video sequences</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Real-world environment recordings</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #2563EB; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Multi-user signers for diversity</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Preprocessing Card -->
+                <div class="card" style="position: relative; overflow: hidden; transition: all 0.35s ease; border-radius: 24px; border: 1px solid #DCE7F5; background: #FFFFFF; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); cursor: pointer;" onmouseover="this.style.transform='translateY(-8px) scale(1.01)'; this.style.boxShadow='0 16px 40px rgba(14, 165, 233, 0.16)'; this.style.borderColor='#BAE6FD';" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(15, 23, 42, 0.08)'; this.style.borderColor='#DCE7F5';">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0EA5E9, #06B6D4); transform-origin: left; transform: scaleX(0); animation: slideIn 0.6s ease 0.4s forwards;"></div>
+                    <div style="padding: 28px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                            <div style="font-size: 36px;">⚙️</div>
+                            <span style="display: inline-block; padding: 6px 12px; background-color: #ECFEFF; border: 1px solid #A5F3FC; border-radius: 999px; color: #0E7490; font-size: 11px; font-weight: 700; text-transform: uppercase;">Pipeline</span>
+                        </div>
+                        <h4 style="font-size: 22px; font-weight: 700; color: #0F172A; margin-bottom: 10px;">Preprocessing Pipeline</h4>
+                        <p style="color: #64748B; font-size: 14px; line-height: 1.6; margin-bottom: 16px;">Standardized sequence preparation for robust temporal sign recognition.</p>
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Frame extraction from video sequences</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>MediaPipe hand landmark detection</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Noise removal and normalization</span>
+                            </li>
+                            <li style="display: flex; gap: 12px; color: #64748B; font-size: 14px;">
+                                <span style="color: #0EA5E9; font-weight: 700; margin-top: 2px;">✓</span>
+                                <span>Sequence alignment for temporal data</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Extraction -->
+            <div class="card" style="background: linear-gradient(135deg, #DBEAFE, #E0F2FE); border: 2px solid #3B82F6;">
+                <h3 style="font-size: 22px; font-weight: 600; color: #1F2937; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 32px;">🔬</span> Advanced Feature Extraction
+                </h3>
+                <p style="color: #1F2937; margin-bottom: 16px;">
+                    Our system uses MediaPipe for robust hand and body pose detection, extracting 468 hand keypoints and full-body skeletal data:
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-top: 24px;">
+                    <div>
+                        <h4 style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">Hand Tracking</h4>
+                        <p style="font-size: 14px; color: #6B7280;">468 keypoints per hand for precise finger and palm detection</p>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">Pose Estimation</h4>
+                        <p style="font-size: 14px; color: #6B7280;">33 landmarks for full body position and movement analysis</p>
+                    </div>
+                    <div>
+                        <h4 style="font-weight: 600; color: #1F2937; margin-bottom: 8px;">Real-time Processing</h4>
+                        <p style="font-size: 14px; color: #6B7280;">Processed at 30 FPS without interrupting user experience</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Section -->
+    <section style="padding: 80px 0; background-color: #1F2937; color: white;">
+        <div class="container">
+            <h2 style="font-size: 42px; font-weight: 700; text-align: center; margin-bottom: 64px;">How It Works</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 48px;">
+                <div>
+                    <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">🧠 Machine Learning Models</h3>
+                    <p style="color: #D1D5DB; margin-bottom: 16px;">
+                        SignAI uses advanced neural networks to understand and generate sign language:
+                    </p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>MLP Networks:</strong> For static sign recognition (letters, numbers)</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>LSTM Networks:</strong> For dynamic sign sequences (words, sentences)</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Keyframe Extraction:</strong> MediaPipe-based hand/pose tracking</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Confidence Scoring:</strong> Real-time prediction confidence visualization</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">📊 Dataset & Training</h3>
+                    <p style="color: #D1D5DB; margin-bottom: 16px;">
+                        Trained on comprehensive sign language datasets:
+                    </p>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Coverage:</strong> 220+ ISL gestures (alphabets, numbers, words, and sentences)</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Data Augmentation:</strong> Enhanced with rotations and noise</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; margin-bottom: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Multi-user Training:</strong> Works with diverse signing styles</span>
+                        </li>
+                        <li style="display: flex; gap: 12px; color: #D1D5DB;">
+                            <span style="color: #06B6D4;">✓</span>
+                            <span><strong>Continuous Learning:</strong> Feedback system for improvements</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section" id="team">
+        <div class="container">
+            <div class="text-center">
+                <h2 style="font-size: 42px; font-weight: 700; color: #0F172A; margin-bottom: 12px;">Meet Our Team</h2>
+                <p class="team-subtitle">The minds behind SignAI</p>
+            </div>
+
+            <div class="team-grid">
+                <article class="team-card">
+                    <div class="team-card-inner">
+                        <div class="avatar-placeholder" aria-label="Avatar placeholder for Shubhankar Sawant">SS</div>
+                        <span class="role-badge"><i class="fa-solid fa-graduation-cap" style="margin-right: 6px;"></i>Final Year Student (IT)</span>
+                        <h3 class="team-name">Shubhankar Sawant</h3>
+                        <p class="team-description">Contributed to model development, dataset preparation, and system integration.</p>
+                        <div class="social-row" aria-label="Social links for Shubhankar Sawant">
+                            <a href="#" class="social-btn" aria-label="Shubhankar Sawant GitHub profile"><i class="fab fa-github"></i></a>
+                            <a href="https://linkedin.com/in/shubhankar-sawant-5b5726269" class="social-btn" aria-label="Shubhankar Sawant LinkedIn profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="team-card">
+                    <div class="team-card-inner">
+                        <div class="avatar-placeholder" aria-label="Avatar placeholder for Omkar Tarve">OT</div>
+                        <span class="role-badge"><i class="fa-solid fa-graduation-cap" style="margin-right: 6px;"></i>Final Year Student (IT)</span>
+                        <h3 class="team-name">Omkar Tarve</h3>
+                        <p class="team-description">Focused on backend development, real-time processing, and deployment.</p>
+                        <div class="social-row" aria-label="Social links for Omkar Tarve">
+                            <a href="https://github.com/TarveOmkar23" class="social-btn" aria-label="Omkar Tarve GitHub profile"><i class="fab fa-github"></i></a>
+                            <a href="https://linkedin.com/in/omkarshaniltarve" class="social-btn" aria-label="Omkar Tarve LinkedIn profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="team-card">
+                    <div class="team-card-inner">
+                        <div class="avatar-placeholder" aria-label="Avatar placeholder for Shravani Kadam">SK</div>
+                        <span class="role-badge"><i class="fa-solid fa-graduation-cap" style="margin-right: 6px;"></i>Final Year Student (IT)</span>
+                        <h3 class="team-name">Shravani Kadam</h3>
+                        <p class="team-description">Contributed to UI/UX design, preprocessing workflows, and quality assurance testing.</p>
+                        <div class="social-row" aria-label="Social links for Shravani Kadam">
+                            <a href="https://github.com/shravanikadam14" class="social-btn" aria-label="Shravani Kadam GitHub profile"><i class="fab fa-github"></i></a>
+                            <a href="https://linkedin.com/in/shravanikadam14" class="social-btn" aria-label="Shravani Kadam LinkedIn profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="team-card">
+                    <div class="team-card-inner">
+                        <div class="avatar-placeholder" aria-label="Avatar placeholder for Madhura Zagade">MZ</div>
+                        <span class="role-badge"><i class="fa-solid fa-user-tie" style="margin-right: 6px;"></i>Assistant Professor (Project Guide)</span>
+                        <h3 class="team-name">Madhura Zagade</h3>
+                        <p class="team-description">Provided academic mentorship, technical direction, and project supervision.</p>
+                        <div class="social-row" aria-label="Social links for Madhura Zagade">
+                            <a href="#" class="social-btn" aria-label="Madhura Zagade GitHub profile"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-btn" aria-label="Madhura Zagade LinkedIn profile"><i class="fab fa-linkedin-in"></i></a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- <aside class="mentor-card" aria-label="Mentors and support section">
+                <div class="mentor-title">Mentors &amp; Support</div>
+                <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                    <div class="avatar-placeholder" style="width: 52px; height: 52px; margin-bottom: 0; font-size: 16px;">VH</div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: 700; color: #0F172A; line-height: 1.3;">Vaidehi Hindlekar</div>
+                        <div style="font-size: 14px; color: #475569; margin-top: 3px;">Industry Mentor</div>
+                    </div>
+                </div>
+            </aside> -->
+        </div>
+    </section>
+
+    <section style="padding: 36px 0; background: #FFFFFF;">
+        <div class="container text-center">
+            <p style="font-size: 20px; font-weight: 600; color: #1E293B; max-width: 980px; margin: 0 auto; line-height: 1.7;">
+                Breaking communication barriers and enabling inclusive interaction between deaf and hearing communities.
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="padding: 64px 0; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white;">
+        <div class="container text-center">
+            <h2 style="font-size: 42px; font-weight: 700; margin-bottom: 16px;">Ready to Bridge Language Barriers?</h2>
+            <p style="font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 32px;">Join thousands democratizing sign language communication</p>
+            <a href="/auth/signup" class="btn btn-primary" style="background-color: white; color: #3B82F6; border: none;">
+                Start Free Today
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background-color: #1F2937; color: #9CA3AF; padding: 48px 0 24px;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; margin-bottom: 32px;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                        <span style="font-size: 24px;">🤟</span>
+                        <span style="font-size: 20px; font-weight: 600; color: white;">SignAI</span>
+                    </div>
+                    <p>Making sign language accessible to everyone</p>
+                </div>
+                <div>
+                    <h4 style="color: white; font-weight: 600; margin-bottom: 16px;">Quick Links</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><a href="/auth/login" style="color: #9CA3AF; text-decoration: none; transition: color 0.2s;">Login</a></li>
+                        <li><a href="/auth/signup" style="color: #9CA3AF; text-decoration: none; transition: color 0.2s;">Sign Up</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: white; font-weight: 600; margin-bottom: 16px;">Contact</h4>
+                    <p style="font-size: 14px;">Email: support@signai.example.com</p>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #374151; padding-top: 32px; text-align: center; font-size: 14px;">
+                <p>&copy; 2024 SignAI. All rights reserved. | <span style="color: #3B82F6;">Accessibility is Our Mission</span></p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

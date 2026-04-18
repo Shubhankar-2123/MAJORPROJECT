@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignAI - My Profile</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { background-color: #F5F7FA; }
+        .tab-button {
+            padding: 12px 16px;
+            font-weight: 500;
+            color: #6B7280;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            color: #3B82F6;
+            border-bottom-color: #3B82F6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar sticky top-0 z-40">
+        <div class="container flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">🤟</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div style="font-weight: 600; font-size: 18px; color: #1F2937; line-height: 1.2;">SignAI</div>
+                    <div style="font-size: 12px; color: #9CA3AF; line-height: 1.2;">My Profile</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/customize" class="btn btn-primary btn-sm btn-fixed">
+                    <i class="fa-solid fa-video" style="margin-right: 6px;"></i>Custom Signs
+                </a>
+                <a href="/app" class="btn btn-secondary btn-sm btn-fixed">
+                    <i class="fa-solid fa-house" style="margin-right: 6px;"></i>Back to App
+                </a>
+                <button onclick="logout()" class="btn btn-danger btn-sm btn-fixed">
+                    <i class="fa-solid fa-right-from-bracket" style="margin-right: 6px;"></i>Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="padding: 48px 0;">
+        <div style="margin-bottom: 48px; text-align: center;">
+            <h1 style="font-size: 42px; font-weight: 700; color: #1F2937; margin-bottom: 8px;">My Profile</h1>
+            <p style="font-size: 16px; color: #6B7280;">Manage your account information and settings</p>
+        </div>
+
+        <!-- Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 32px; border-bottom: 1px solid #E5E7EB; justify-content: center;">
+            <button onclick="showTab('profile')" class="tab-button active" id="tab-profile">
+                <i class="fa-solid fa-user" style="margin-right: 8px;"></i>Profile Information
+            </button>
+            <button onclick="showTab('password')" class="tab-button" id="tab-password">
+                <i class="fa-solid fa-lock" style="margin-right: 8px;"></i>Change Password
+            </button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profile-tab" class="tab-content active">
+            <div class="card" style="max-width: 700px; margin: 0 auto;">
+                <h2 style="font-size: 24px; font-weight: 600; color: #1F2937; margin-bottom: 32px;">Profile Information</h2>
+
+                <div id="profile-view">
+                    <div style="display: grid; gap: 24px;">
+                        <!-- Username (read-only) -->
+                        <div>
+                            <label class="form-label">Username</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-username">-</p>
+                            <p class="form-helper-text">Cannot be changed</p>
+                        </div>
+
+                        <!-- Email (read-only) -->
+                        <div>
+                            <label class="form-label">Email</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-email">-</p>
+                            <p class="form-helper-text">Cannot be changed without verification</p>
+                        </div>
+
+                        <!-- Full Name -->
+                        <div>
+                            <label class="form-label">Full Name</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-full-name">Not provided</p>
+                        </div>
+
+                        <!-- Mobile -->
+                        <div>
+                            <label class="form-label">Mobile Number</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-mobile">Not provided</p>
+                        </div>
+
+                        <!-- Gender -->
+                        <div>
+                            <label class="form-label">Gender</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-gender">Not specified</p>
+                        </div>
+
+                        <!-- DOB -->
+                        <div>
+                            <label class="form-label">Date of Birth</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-dob">Not provided</p>
+                        </div>
+
+                        <!-- Disability -->
+                        <div>
+                            <label class="form-label">Disability / Special Needs</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-disability">Not specified</p>
+                        </div>
+
+                        <!-- Join Date -->
+                        <div>
+                            <label class="form-label">Member Since</label>
+                            <p style="font-size: 16px; color: #1F2937; margin: 0;" id="display-joined">-</p>
+                        </div>
+
+                        <!-- Edit Button -->
+                        <div style="padding-top: 24px; border-top: 1px solid #E5E7EB;">
+                            <button onclick="enterEditMode()" class="btn btn-primary">
+                                <i class="fa-solid fa-pen-to-square" style="margin-right: 8px;"></i>Edit Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <form id="profile-form" style="display: none;">
+                    <div style="display: grid; gap: 24px;">
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input 
+                                type="text" 
+                                id="edit-full-name"
+                                placeholder="Your full name"
+                                class="form-control"
+                            />
+                        </div>
+
+                        <!-- Mobile -->
+                        <div class="form-group">
+                            <label class="form-label">Mobile Number</label>
+                            <div style="display: flex;">
+                                <div style="padding: 12px 16px; background-color: #F5F7FA; border-radius: 8px 0 0 8px; border: 1px solid #E5E7EB; border-right: none; color: #6B7280; font-weight: 500; display: flex; align-items: center;">
+                                    +91
+                                </div>
+                                <input 
+                                    type="tel" 
+                                    id="edit-mobile"
+                                    placeholder="9876543210"
+                                    maxlength="10"
+                                    style="flex: 1; border-radius: 0 8px 8px 0;"
+                                    class="form-control"
+                                />
+                            </div>
+                            <div id="mobile-error" class="form-error" style="display: none;"></div>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select 
+                                id="edit-gender"
+                                class="form-control"
+                            >
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                                <option value="Prefer not to say">Prefer not to say</option>
+                            </select>
+                        </div>
+
+                        <!-- Disability -->
+                        <div class="form-group">
+                            <label class="form-label">Disability / Special Needs</label>
+                            <input 
+                                type="text" 
+                                id="edit-disability"
+                                placeholder="(Optional) e.g., Deaf, Hard of Hearing, etc."
+                                class="form-control"
+                            />
+                        </div>
+
+                        <!-- Error Messages -->
+                        <div id="edit-error" class="alert alert-error" style="display: none;"></div>
+
+                        <!-- Buttons -->
+                        <div style="display: flex; gap: 12px; padding-top: 24px; border-top: 1px solid #E5E7EB;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-floppy-disk" style="margin-right: 8px;"></i>Save Changes
+                            </button>
+                            <button type="button" onclick="exitEditMode()" class="btn btn-secondary">
+                                <i class="fa-solid fa-x" style="margin-right: 8px;"></i>Cancel
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Password Tab -->
+        <div id="password-tab" class="tab-content">
+            <div class="card" style="max-width: 500px; margin: 0 auto;">
+                <h2 style="font-size: 24px; font-weight: 600; color: #1F2937; margin-bottom: 32px;">Change Password</h2>
+
+                <form id="password-form" style="display: grid; gap: 24px;">
+                    <!-- Current Password -->
+                    <div class="form-group">
+                        <label class="form-label">Current Password *</label>
+                        <input 
+                            type="password" 
+                            id="current-password"
+                            placeholder="Enter your current password"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="form-group">
+                        <label class="form-label">New Password *</label>
+                        <input 
+                            type="password" 
+                            id="new-password"
+                            placeholder="Enter new password"
+                            class="form-control"
+                            required
+                        />
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; display: grid; gap: 4px;">
+                            <p>✓ At least 8 characters</p>
+                            <p>✓ At least one uppercase letter</p>
+                            <p>✓ At least one number</p>
+                        </div>
+                    </div>
+
+                    <!-- Confirm New Password -->
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password *</label>
+                        <input 
+                            type="password" 
+                            id="confirm-new-password"
+                            placeholder="Re-enter new password"
+                            class="form-control"
+                            required
+                        />
+                    </div>
+
+                    <!-- Error/Success Messages -->
+                    <div id="password-error" class="alert alert-error" style="display: none;"></div>
+                    <div id="password-success" class="alert alert-success" style="display: none;"></div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary btn-lg"
+                    >
+                        <i class="fa-solid fa-key" style="margin-right: 8px;"></i>Change Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProfile = null;
+
+        // Load profile
+        async function loadProfile() {
+            try {
+                const res = await fetch('/profile');
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    currentProfile = data.profile;
+                    displayProfile();
+                } else {
+                    window.location.href = '/auth/login';
+                }
+            } catch (e) {
+                console.error('Failed to load profile:', e);
+            }
+        }
+
+        function displayProfile() {
+            if (!currentProfile) return;
+
+            document.getElementById('display-username').textContent = currentProfile.username;
+            document.getElementById('display-email').textContent = currentProfile.email;
+            document.getElementById('display-full-name').textContent = currentProfile.full_name || 'Not provided';
+            document.getElementById('display-mobile').textContent = currentProfile.mobile ? '+91 ' + currentProfile.mobile : 'Not provided';
+            document.getElementById('display-gender').textContent = currentProfile.gender || 'Not specified';
+            document.getElementById('display-dob').textContent = currentProfile.dob || 'Not provided';
+            document.getElementById('display-disability').textContent = currentProfile.disability || 'Not specified';
+            
+            const joined = new Date(currentProfile.created_at).toLocaleDateString('en-IN', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('display-joined').textContent = joined;
+
+            // Populate edit form
+            document.getElementById('edit-full-name').value = currentProfile.full_name || '';
+            document.getElementById('edit-mobile').value = currentProfile.mobile || '';
+            document.getElementById('edit-gender').value = currentProfile.gender || '';
+            document.getElementById('edit-disability').value = currentProfile.disability || '';
+        }
+
+        function showTab(tab) {
+            // Hide all tabs
+            document.getElementById('profile-tab').classList.toggle('active', tab === 'profile');
+            document.getElementById('password-tab').classList.toggle('active', tab === 'password');
+
+            // Update tab buttons
+            document.getElementById('tab-profile').classList.toggle('active', tab === 'profile');
+            document.getElementById('tab-password').classList.toggle('active', tab === 'password');
+        }
+
+        function enterEditMode() {
+            document.getElementById('profile-view').style.display = 'none';
+            document.getElementById('profile-form').style.display = 'grid';
+        }
+
+        function exitEditMode() {
+            document.getElementById('profile-view').style.display = 'block';
+            document.getElementById('profile-form').style.display = 'none';
+        }
+
+        // Profile form submission
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const mobile = document.getElementById('edit-mobile').value.trim();
+            const mobileError = document.getElementById('mobile-error');
+            mobileError.style.display = 'none';
+
+            if (mobile && !/^\d{10}$/.test(mobile)) {
+                mobileError.textContent = 'Mobile number must be exactly 10 digits';
+                mobileError.style.display = 'block';
+                return;
+            }
+
+            const updateData = {
+                full_name: document.getElementById('edit-full-name').value.trim() || null,
+                mobile: mobile || null,
+                gender: document.getElementById('edit-gender').value || null,
+                disability: document.getElementById('edit-disability').value.trim() || null
+            };
+
+            try {
+                const res = await fetch('/profile', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updateData)
+                });
+
+                const data = await res.json();
+                const editError = document.getElementById('edit-error');
+
+                if (res.ok && data.success) {
+                    editError.style.display = 'none';
+                    currentProfile = data.profile;
+                    displayProfile();
+                    exitEditMode();
+                } else {
+                    editError.textContent = data.error || 'Failed to update profile';
+                    editError.style.display = 'block';
+                }
+            } catch (e) {
+                const editError = document.getElementById('edit-error');
+                editError.textContent = 'Error updating profile';
+                editError.style.display = 'block';
+            }
+        });
+
+        // Password change form submission
+        document.getElementById('password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+
+            const passwordError = document.getElementById('password-error');
+            const passwordSuccess = document.getElementById('password-success');
+            passwordError.style.display = 'none';
+            passwordSuccess.style.display = 'none';
+
+            if (newPassword.length < 8) {
+                passwordError.textContent = 'Password must be at least 8 characters';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (!/[A-Z]/.test(newPassword)) {
+                passwordError.textContent = 'Password must contain at least one uppercase letter';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (!/\d/.test(newPassword)) {
+                passwordError.textContent = 'Password must contain at least one number';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                passwordError.textContent = 'New passwords do not match';
+                passwordError.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/profile/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    passwordSuccess.textContent = 'Password changed successfully!';
+                    passwordSuccess.style.display = 'block';
+                    document.getElementById('password-form').reset();
+                } else {
+                    passwordError.textContent = data.error || 'Failed to change password';
+                    passwordError.style.display = 'block';
+                }
+            } catch (e) {
+                passwordError.textContent = 'Error changing password';
+                passwordError.style.display = 'block';
+            }
+        });
+
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await fetch('/auth/logout', { method: 'POST' });
+                    window.location.href = '/';
+                } catch (e) {
+                    console.error('Logout failed:', e);
+                }
+            }
+        }
+
+        loadProfile();
+    </script>
+</body>
+</html>

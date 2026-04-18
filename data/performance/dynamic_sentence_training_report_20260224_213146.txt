@@ -1,0 +1,28 @@
+Classification Report
+
+                                     precision    recall  f1-score   support
+
+        No need to worry dont worry       1.00      1.00      1.00         1
+            This place is beautiful       1.00      1.00      1.00         8
+                  let him take time       1.00      1.00      1.00         8
+                         my name is       1.00      1.00      1.00         8
+                   nice to meet you       1.00      0.89      0.94         9
+ now onwards he will never hurt you       1.00      1.00      1.00         7
+pour some more water into the glass       1.00      1.00      1.00         9
+                    prepare the bed       0.88      0.88      0.88         8
+                     serve the food       1.00      1.00      1.00        11
+                shall we go outside       1.00      1.00      1.00         9
+                       speak softly       0.91      1.00      0.95        10
+              take care of yourself       1.00      1.00      1.00         9
+                      tell me truth       0.88      1.00      0.93         7
+                  thank you so much       1.00      1.00      1.00         8
+             that is so kind of you       1.00      1.00      1.00         8
+                  try to understand       0.90      1.00      0.95         9
+       turn on light turn off light       1.00      0.88      0.93         8
+                we are all with you       1.00      1.00      1.00         9
+                     wear the shirt       0.86      0.75      0.80         8
+                 what are you doing       1.00      1.00      1.00         8
+
+                           accuracy                           0.97       162
+                          macro avg       0.97      0.97      0.97       162
+                       weighted avg       0.97      0.97      0.97       162

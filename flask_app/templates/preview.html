@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignAI - Dictionary Preview</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .title-font { font-family: inherit; }
+        .hero-bg {
+            background: #F5F7FA;
+        }
+        .glass {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
+        .video-thumbnail {
+            background: #EAEDF2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 160px;
+            border-radius: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .video-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-play-icon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(59, 130, 246, 0.12);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen hero-bg">
+    <!-- Navigation -->
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between text-slate-900">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg text-lg">🤟</div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div class="font-semibold text-lg" style="line-height: 1.2;">SignAI Dictionary Preview</div>
+                <div class="text-xs text-slate-500" style="line-height: 1.2;">Explore before you start</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="username" class="text-slate-600 font-medium text-sm">Welcome!</span>
+            <button onclick="openLogoutModal()" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm transition">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-10">
+        <!-- Hero Section -->
+        <section class="grid lg:grid-cols-2 gap-8 items-center mb-10 fade-in">
+            <div>
+                <h1 class="title-font text-4xl lg:text-5xl leading-tight mb-4 text-slate-900">
+                    Your sign language journey starts here
+                </h1>
+                <p class="text-slate-600 mb-6">
+                    Browse our comprehensive dictionary of sign language videos. Learn common signs, practice gestures, and build your vocabulary before diving into the full experience.
+                </p>
+                <button onclick="skipToDashboard()" 
+                    class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition flex items-center gap-2 shadow-lg">
+                    Skip to Dashboard <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="grid gap-4">
+                <div class="glass rounded-2xl p-5">
+                    <div class="text-xs uppercase tracking-widest text-blue-600 font-semibold">Vocabulary Size</div>
+                    <div id="vocab-count" class="text-4xl font-bold text-slate-900 mt-1">0</div>
+                    <div class="text-sm text-slate-600 mt-1">Total signs in dictionary</div>
+                </div>
+                <div class="glass rounded-2xl p-5">
+                    <div class="text-xs uppercase tracking-widest text-blue-600 font-semibold mb-2">Quick Tips</div>
+                    <ul class="text-sm text-slate-700 space-y-1">
+                        <li>• Click any card to preview the full video</li>
+                        <li>• Use search to find specific signs</li>
+                        <li>• Browse separate Words and Sentences sections</li>
+                        <li>• Use More to load additional signs</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search & Filters -->
+        <section class="mb-6 flex flex-wrap items-center gap-3">
+            <div class="flex items-center justify-between w-full mb-2">
+                <h2 class="title-font text-2xl text-slate-900">Browse Dictionary</h2>
+                <span class="text-xs text-slate-500" id="showing-count">Showing 0 of 0</span>
+            </div>
+            <div class="flex-1 min-w-[240px]">
+                <input id="search-input" type="text" placeholder="Search signs..." 
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm" />
+            </div>
+        </section>
+
+        <!-- Dictionary Sections -->
+        <section class="mb-12 space-y-10">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="title-font text-2xl text-slate-900">Words</h3>
+                    <span class="text-xs text-slate-500" id="word-count">0 total</span>
+                </div>
+                <div id="word-cards-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full text-center py-12">
+                        <div class="inline-block">
+                            <i class="fas fa-spinner animate-spin text-4xl text-blue-500"></i>
+                        </div>
+                        <p class="text-slate-500 mt-4 text-sm">Loading word entries...</p>
+                    </div>
+                </div>
+                <div id="word-empty-state" class="text-center py-8 hidden">
+                    <p class="text-slate-500 text-sm">No matching words found.</p>
+                </div>
+                <div class="text-center mt-4">
+                    <button id="word-more-btn" class="hidden px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium transition">More Words</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="title-font text-2xl text-slate-900">Sentences</h3>
+                    <span class="text-xs text-slate-500" id="sentence-count">0 total</span>
+                </div>
+                <div id="sentence-cards-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full text-center py-12">
+                        <div class="inline-block">
+                            <i class="fas fa-spinner animate-spin text-4xl text-blue-500"></i>
+                        </div>
+                        <p class="text-slate-500 mt-4 text-sm">Loading sentence entries...</p>
+                    </div>
+                </div>
+                <div id="sentence-empty-state" class="text-center py-8 hidden">
+                    <p class="text-slate-500 text-sm">No matching sentences found.</p>
+                </div>
+                <div class="text-center mt-4">
+                    <button id="sentence-more-btn" class="hidden px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-sm font-medium transition">More Sentences</button>
+                </div>
+            </div>
+
+            <div id="empty-state" class="text-center py-8 hidden">
+                <p class="text-slate-500 text-sm">No matching entries found. Try a different search.</p>
+            </div>
+        </section>
+
+        <!-- Footer Info -->
+        <section class="glass rounded-2xl p-6 text-center">
+            <p class="text-slate-700 text-sm mb-4">
+                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                Showing <strong id="loaded-count">0</strong> signs across words and sentences.
+            </p>
+            <p class="text-slate-600 text-xs">
+                Ready to explore the full system? Skip to the dashboard and start translating.
+            </p>
+        </section>
+    </main>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-2xl overflow-hidden" onclick="event.stopPropagation()">
+            <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+                <div class="font-semibold text-lg text-slate-900" id="modal-title">Preview</div>
+                <button id="close-modal" class="text-slate-500 hover:text-slate-700 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6 bg-slate-50">
+                <video id="modal-video" class="w-full rounded-xl bg-black" controls></video>
+                <div id="modal-info" class="mt-4 text-sm text-slate-600"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="logout-modal" class="fixed inset-0 bg-slate-900/40 hidden items-center justify-center z-50 px-4">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 fade-in" onclick="event.stopPropagation()">
+            <h2 class="text-2xl font-bold text-slate-900 mb-2">Confirm Logout</h2>
+            <p class="text-slate-600 mb-6">Are you sure you want to logout?</p>
+            <div class="flex items-center justify-end gap-3">
+                <button id="logout-confirm-btn" class="px-5 py-2.5 rounded-xl bg-white hover:bg-blue-50 text-blue-600 border border-blue-200 font-semibold transition">
+                    Yes
+                </button>
+                <button id="logout-cancel-btn" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wordCardsContainer = document.getElementById('word-cards-container');
+        const sentenceCardsContainer = document.getElementById('sentence-cards-container');
+        const wordEmptyState = document.getElementById('word-empty-state');
+        const sentenceEmptyState = document.getElementById('sentence-empty-state');
+        const wordCountEl = document.getElementById('word-count');
+        const sentenceCountEl = document.getElementById('sentence-count');
+        const wordMoreBtn = document.getElementById('word-more-btn');
+        const sentenceMoreBtn = document.getElementById('sentence-more-btn');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('search-input');
+        const vocabCount = document.getElementById('vocab-count');
+        const showingCount = document.getElementById('showing-count');
+        const loadedCountEl = document.getElementById('loaded-count');
+        const previewModal = document.getElementById('preview-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalVideo = document.getElementById('modal-video');
+        const modalInfo = document.getElementById('modal-info');
+        const closeModal = document.getElementById('close-modal');
+        const logoutModal = document.getElementById('logout-modal');
+        const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+        const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+
+        const INITIAL_LOAD = 5;
+        const LOAD_MORE_COUNT = 5;
+
+        let allEntries = [];
+        let filteredEntries = [];
+        const visibleCounts = { word: INITIAL_LOAD, sentence: INITIAL_LOAD };
+
+        function openModal(entry) {
+            modalTitle.textContent = `${entry.word} (${entry.type || 'word'})`;
+            modalVideo.src = entry.url;
+            modalInfo.innerHTML = `<strong>Type:</strong> ${entry.type || 'word'}<br><strong>Source:</strong> ${entry.source || 'system'}`;
+            previewModal.classList.remove('hidden');
+            previewModal.classList.add('flex');
+        }
+
+        function closePreview() {
+            modalVideo.pause();
+            modalVideo.src = '';
+            previewModal.classList.add('hidden');
+            previewModal.classList.remove('flex');
+        }
+
+        function openLogoutModal() {
+            logoutModal.classList.remove('hidden');
+            logoutModal.classList.add('flex');
+        }
+
+        function closeLogoutModal() {
+            logoutModal.classList.add('hidden');
+            logoutModal.classList.remove('flex');
+        }
+
+        function createCard(entry) {
+            const card = document.createElement('div');
+            card.className = 'card glass rounded-2xl shadow overflow-hidden cursor-pointer fade-in';
+            
+            const badge = entry.source === 'user'
+                ? '<span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700 font-semibold">User</span>'
+                : '<span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-semibold">System</span>';
+
+            card.innerHTML = `
+                <div class="video-thumbnail">
+                    <video src="${entry.url}" muted preload="none"></video>
+                    <div class="video-play-icon">
+                        <i class="fas fa-play text-white text-xl"></i>
+                    </div>
+                </div>
+                <div class="p-4">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <div class="font-semibold text-lg text-slate-900">${entry.word}</div>
+                        ${badge}
+                    </div>
+                    <div class="text-xs text-slate-500 mb-2">Type: <span class="font-medium">${entry.type || 'word'}</span></div>
+                    <div class="text-xs text-blue-700 font-medium">
+                        <i class="fas fa-play-circle mr-1"></i>Click to preview
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', () => openModal(entry));
+            return card;
+        }
+
+        function renderSection(type, entries, container, emptyEl, moreBtn, countEl) {
+            container.innerHTML = '';
+            emptyEl.classList.add('hidden');
+
+            const visible = Math.min(visibleCounts[type], entries.length);
+            entries.slice(0, visible).forEach(entry => {
+                const card = createCard(entry);
+                container.appendChild(card);
+            });
+
+            countEl.textContent = `${entries.length} total`;
+
+            if (!entries.length) {
+                emptyEl.classList.remove('hidden');
+                moreBtn.classList.add('hidden');
+                return;
+            }
+
+            if (visible < entries.length) {
+                moreBtn.classList.remove('hidden');
+            } else {
+                moreBtn.classList.add('hidden');
+            }
+        }
+
+        function updateCounters() {
+            const total = filteredEntries.length;
+            const wordsTotal = filteredEntries.filter(e => e.type === 'word').length;
+            const sentencesTotal = filteredEntries.filter(e => e.type === 'sentence').length;
+            const loadedWords = Math.min(visibleCounts.word, wordsTotal);
+            const loadedSentences = Math.min(visibleCounts.sentence, sentencesTotal);
+            const loaded = loadedWords + loadedSentences;
+
+            showingCount.textContent = `Showing ${loaded} of ${total}`;
+            loadedCountEl.textContent = loaded;
+        }
+
+        function renderAllSections() {
+            const words = filteredEntries
+                .filter(entry => entry.type === 'word')
+                .sort((a, b) => a.word.localeCompare(b.word));
+            const sentences = filteredEntries
+                .filter(entry => entry.type === 'sentence')
+                .sort((a, b) => a.word.localeCompare(b.word));
+
+            renderSection('word', words, wordCardsContainer, wordEmptyState, wordMoreBtn, wordCountEl);
+            renderSection('sentence', sentences, sentenceCardsContainer, sentenceEmptyState, sentenceMoreBtn, sentenceCountEl);
+
+            if (!filteredEntries.length) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            updateCounters();
+        }
+
+        function applyFilters() {
+            const query = (searchInput.value || '').toLowerCase().trim();
+
+            filteredEntries = allEntries.filter(entry => {
+                const matchesQuery = !query || entry.word.toLowerCase().includes(query);
+                return matchesQuery;
+            });
+
+            visibleCounts.word = INITIAL_LOAD;
+            visibleCounts.sentence = INITIAL_LOAD;
+            renderAllSections();
+        }
+
+        async function loadUserInfo() {
+            try {
+                const res = await fetch('/api/session');
+                const data = await res.json();
+                if (data.logged_in && data.user) {
+                    document.getElementById('username').textContent = `Welcome, ${data.user.username}!`;
+                }
+            } catch (e) {
+                console.error('Error loading user info:', e);
+            }
+        }
+
+        async function loadDictionary() {
+            try {
+                const res = await fetch('/api/dictionary');
+                const data = await res.json();
+
+                if (!res.ok) {
+                    emptyState.textContent = data.error || 'Unable to load dictionary.';
+                    emptyState.classList.remove('hidden');
+                    cardsContainer.innerHTML = '';
+                    return;
+                }
+
+                allEntries = data.entries || [];
+                filteredEntries = [...allEntries];
+                vocabCount.textContent = data.count || allEntries.length || 0;
+                renderAllSections();
+            } catch (e) {
+                console.error('Error loading dictionary:', e);
+                emptyState.textContent = 'Unable to load dictionary.';
+                emptyState.classList.remove('hidden');
+                wordCardsContainer.innerHTML = '';
+                sentenceCardsContainer.innerHTML = '';
+            }
+        }
+
+        function skipToDashboard() {
+            window.location.href = '/app';
+        }
+
+        async function doLogout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+            } catch (_) {}
+            window.location.href = '/';
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        wordMoreBtn.addEventListener('click', () => {
+            visibleCounts.word += LOAD_MORE_COUNT;
+            renderAllSections();
+        });
+        sentenceMoreBtn.addEventListener('click', () => {
+            visibleCounts.sentence += LOAD_MORE_COUNT;
+            renderAllSections();
+        });
+        closeModal.addEventListener('click', closePreview);
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) closePreview();
+        });
+        logoutConfirmBtn.addEventListener('click', doLogout);
+        logoutCancelBtn.addEventListener('click', closeLogoutModal);
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) closeLogoutModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!previewModal.classList.contains('hidden')) closePreview();
+                if (!logoutModal.classList.contains('hidden')) closeLogoutModal();
+            }
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                loadUserInfo();
+                loadDictionary();
+            });
+        } else {
+            loadUserInfo();
+            loadDictionary();
+        }
+    </script>
+</body>
+</html>

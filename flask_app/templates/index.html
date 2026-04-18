@@ -28,6 +28,17 @@
       const result = await response.json();
       if(response.ok) {
         document.getElementById('static-result').textContent = 'Prediction: ' + result.prediction;
+        const mime = result.tts_mime || 'audio/mpeg';
+        if (result.tts_audio) {
+          const audio = new Audio(`data:${mime};base64,${result.tts_audio}`);
+          audio.autoplay = true;
+          audio.play().catch(() => {});
+        } else if (result.tts_url) {
+          const url = result.tts_url.startsWith('http') ? result.tts_url : `${location.origin}${result.tts_url}`;
+          const audio = new Audio(url);
+          audio.autoplay = true;
+          audio.play().catch(() => {});
+        }
       } else {
         document.getElementById('static-result').textContent = 'Error: ' + result.error;
       }
@@ -40,6 +51,17 @@
       const result = await response.json();
       if(response.ok) {
         document.getElementById('dynamic-result').textContent = 'Prediction: ' + result.prediction;
+        const mime = result.tts_mime || 'audio/mpeg';
+        if (result.tts_audio) {
+          const audio = new Audio(`data:${mime};base64,${result.tts_audio}`);
+          audio.autoplay = true;
+          audio.play().catch(() => {});
+        } else if (result.tts_url) {
+          const url = result.tts_url.startsWith('http') ? result.tts_url : `${location.origin}${result.tts_url}`;
+          const audio = new Audio(url);
+          audio.autoplay = true;
+          audio.play().catch(() => {});
+        }
       } else {
         document.getElementById('dynamic-result').textContent = 'Error: ' + result.error;
       }
@@ -55,13 +77,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Language Translator - AI Powered</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        
-        * { font-family: 'Poppins', sans-serif; }
-        
         .msg-enter { animation: fadeInUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         @keyframes fadeInUp { 
             from { opacity: 0; transform: translateY(20px) scale(0.95);} 
@@ -69,22 +87,17 @@
         }
         
         .gradient-bg {
-            /* Subtle, professional dark slate gradient */
-            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            background-color: #3B82F6;
         }
         
         .gradient-text {
-            /* Minimal blue accent for headings */
-            background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #3B82F6;
         }
         
         .glass-effect {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(17, 24, 39, 0.12);
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         
         .btn-hover {
@@ -93,17 +106,17 @@
         
         .btn-hover:hover {
             transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         
         .bubble-user {
-            background: #1f2937; /* slate-800 */
-            color: #ffffff;
+            background: #DBEAFE;
+            color: #1F2937;
         }
         
         .bubble-app {
-            background: #374151; /* slate-700 */
-            color: #ffffff;
+            background: #F5F7FA;
+            color: #1F2937;
         }
         
         .loading-spinner {
@@ -130,7 +143,7 @@
         }
         
         body {
-            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+            background: #F5F7FA;
         }
     </style>
     <meta name="color-scheme" content="light dark">
@@ -139,57 +152,48 @@
 </head>
 <body class="min-h-screen">
     <div class="flex h-screen">
-        <!-- Modern Sidebar -->
-        <aside class="hidden lg:flex w-80 glass-effect backdrop-blur-xl p-6 flex-col shadow-2xl">
-            <div class="flex items-center gap-3 mb-8">
+        <!-- Modern Sidebar with Conversation History -->
+        <aside class="hidden lg:flex w-80 glass-effect backdrop-blur-xl p-6 flex-col shadow-2xl h-screen overflow-hidden">
+            <div class="flex items-center gap-4 mb-8">
                 <div class="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center text-white text-2xl shadow-lg">
                     🤟
                 </div>
-                <div>
-                    <div class="font-bold text-xl gradient-text">SignAI</div>
-                    <div class="text-xs text-gray-600">Translator v2.0</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div class="font-bold text-xl gradient-text" style="line-height: 1.2;">SignAI</div>
+                    <div class="text-xs text-gray-600" style="line-height: 1.2;">Translator v2.0</div>
                 </div>
             </div>
             
-            <!-- Stats Cards -->
-            <div class="space-y-3 mb-6">
-                <div class="bg-white rounded-xl p-4 shadow-md">
-                    <div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
-                            <i class="fa-solid fa-image"></i>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold gradient-text" id="stat-images">0</div>
-                            <div class="text-xs text-gray-500">Images Processed</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl p-4 shadow-md">
-                    <div class="flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
-                            <i class="fa-solid fa-video"></i>
-                        </div>
-                        <div>
-                            <div class="text-2xl font-bold gradient-text" id="stat-videos">0</div>
-                            <div class="text-xs text-gray-500">Videos Processed</div>
-                        </div>
-                    </div>
+            <!-- New Chat Button -->
+            <button id="new-chat-btn" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium mb-4 flex items-center justify-center gap-2 shadow-lg transition-all">
+                <i class="fa-solid fa-plus"></i>
+                <span>New Chat</span>
+            </button>
+
+            <!-- Chat History (Scrollable) -->
+            <div class="flex-1 min-h-0 flex flex-col">
+                <div class="text-xs font-semibold text-gray-600 mb-3">CHAT HISTORY</div>
+                <div id="conversations-list" class="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
+                    <div class="text-xs text-gray-500 text-center py-8">Loading conversations...</div>
                 </div>
             </div>
-            
-            <div class="text-xs font-semibold text-gray-600 mb-3">QUICK TIPS</div>
-            <div class="flex-1 overflow-y-auto space-y-2">
-                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
-                    <div class="font-medium text-purple-600 mb-1">✨ Good Lighting</div>
-                    <div class="text-xs text-gray-600">Ensure signs are well-lit and clearly visible</div>
-                </div>
-                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
-                    <div class="font-medium text-purple-600 mb-1">👋 Clear Gestures</div>
-                    <div class="text-xs text-gray-600">Make signs slowly and deliberately</div>
-                </div>
-                <div class="p-3 rounded-xl bg-white shadow-sm text-sm">
-                    <div class="font-medium text-purple-600 mb-1">🎬 Video Tips</div>
-                    <div class="text-xs text-gray-600">Keep videos 2-5 seconds for best results</div>
+
+            <!-- Quick Tips (Always Visible) -->
+            <div class="mt-4 pt-4 border-t border-slate-200/80 shrink-0">
+                <div class="text-xs font-semibold text-gray-600 mb-2">QUICK TIPS</div>
+                <div class="space-y-2">
+                    <div class="p-2.5 rounded-lg bg-white/95 shadow-sm text-xs text-gray-700 flex items-start gap-2">
+                        <i class="fa-solid fa-sun text-blue-600 mt-0.5"></i>
+                        <span>Use good lighting for clearer signs.</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-white/95 shadow-sm text-xs text-gray-700 flex items-start gap-2">
+                        <i class="fa-solid fa-hand text-blue-600 mt-0.5"></i>
+                        <span>Keep gestures slow and centered.</span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-white/95 shadow-sm text-xs text-gray-700 flex items-start gap-2">
+                        <i class="fa-solid fa-video text-blue-600 mt-0.5"></i>
+                        <span>Record 2-5 seconds for best results.</span>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -205,15 +209,30 @@
                     <div>
                         <div class="font-bold text-xl gradient-text">Sign Language Translator</div>
                         <div class="text-xs text-gray-500 flex items-center gap-2">
-                            <span class="w-2 h-2 bg-green-500 rounded-full pulse-animation"></span>
+                            <span class="w-2 h-2 bg-blue-500 rounded-full pulse-animation"></span>
                             AI-Powered Recognition
                         </div>
                     </div>
                 </div>
                 <div class="hidden md:flex items-center gap-3 text-sm">
-<div class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-medium">
+                    <div class="px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-medium">
                         <i class="fa-solid fa-brain mr-2"></i>95% Accuracy
                     </div>
+                    <button id="dashboard-btn" class="px-4 py-2 rounded-full bg-slate-600 hover:bg-slate-700 text-white font-medium hidden">
+                        <i class="fa-solid fa-chart-line mr-2"></i>Dashboard
+                    </button>
+                    <button id="dictionary-btn" class="px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium hidden">
+                        <i class="fa-solid fa-book mr-2"></i>Dictionary
+                    </button>
+                    <a id="user-pill" href="/profile/view" class="px-4 py-2 rounded-full bg-slate-800 text-white font-medium hidden hover:bg-slate-900" title="View profile">
+                        <i class="fa-solid fa-user mr-2"></i><span id="username-display"></span>
+                    </a>
+                    <button id="logout-btn" class="px-4 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-medium hidden">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
+                    </button>
+                    <button id="login-btn" class="px-4 py-2 rounded-full bg-slate-700 hover:bg-slate-800 text-white font-medium">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i>Login
+                    </button>
                 </div>
             </header>
 
@@ -231,8 +250,8 @@
             <footer class="px-6 py-4 bg-white shadow-2xl border-t border-gray-100">
                 <div class="max-w-4xl mx-auto">
                     <div class="flex items-center gap-3 mb-3">
-                        <input id="text-input" type="text" 
-                               class="flex-1 rounded-2xl border-2 border-gray-200 px-6 py-4 text-sm focus:outline-none focus:border-purple-500 transition-all shadow-sm" 
+                           <input id="text-input" type="text" 
+                               class="flex-1 rounded-2xl border-2 border-gray-200 bg-white px-6 py-4 text-sm focus:outline-none focus:border-blue-400 transition-all shadow-sm" 
                                placeholder="Type text to convert to sign language...">
                         <button id="text-to-sign-btn" 
                                 class="w-14 h-14 rounded-2xl gradient-bg text-white flex items-center justify-center btn-hover shadow-lg" 
@@ -240,16 +259,38 @@
                             <i class="fa-solid fa-language text-xl"></i>
                         </button>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <select id="kind-select" class="px-3 py-3 rounded-2xl border-2 border-gray-200 text-sm focus:outline-none focus:border-slate-500">
-                            <option value="">Auto</option>
-                            <option value="word">Word</option>
-                            <option value="sentence">Sentence</option>
-                        </select>
-                        <button id="camera-btn" 
-                                class="flex-1 px-6 py-3 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-medium btn-hover shadow-lg flex items-center justify-center gap-2">
+                    <!-- Controls Row -->
+                    <div class="mt-3 flex items-end gap-3 overflow-x-auto pb-1">
+                        <div class="min-w-[170px] flex-1">
+                            <label for="lang-select" class="block text-xs font-medium text-slate-600 mb-1">Language</label>
+                            <select id="lang-select" class="w-full h-12 px-3 rounded-2xl border-2 border-gray-200 bg-white text-sm focus:outline-none focus:border-slate-500 form-select">
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="mr">Marathi</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                            </select>
+                        </div>
+                        <div class="min-w-[170px] flex-1">
+                            <label for="mode-select" class="block text-xs font-medium text-slate-600 mb-1">Mode</label>
+                            <select id="mode-select" class="w-full h-12 px-3 rounded-2xl border-2 border-gray-200 bg-white text-sm focus:outline-none focus:border-slate-500 form-select">
+                                <option value="auto" selected>Auto</option>
+                                <option value="alphabet">Alphabet</option>
+                                <option value="number">Number</option>
+                                <option value="word">Word</option>
+                                <option value="sentence">Sentence</option>
+                            </select>
+                        </div>
+
+                        <button id="upload-btn"
+                            class="h-12 min-w-[130px] px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-medium btn-hover shadow-lg flex items-center justify-center gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-upload"></i>
+                            <span>Upload</span>
+                        </button>
+                        <button id="camera-btn"
+                            class="h-12 min-w-[130px] px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium btn-hover shadow-lg flex items-center justify-center gap-2 whitespace-nowrap">
                             <i class="fa-solid fa-camera"></i>
-                            <span>Upload Image/Video</span>
+                            <span>Camera</span>
                         </button>
                         <input id="file-input" type="file" accept="image/*,video/*" class="hidden">
                     </div>
@@ -259,20 +300,56 @@
     </div>
 
     <!-- Camera Modal -->
-    <div id="camera-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center">
-        <div class="bg-white w-full max-w-md rounded-xl overflow-hidden shadow-xl">
+    <div id="camera-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-xl overflow-hidden shadow-xl mx-4" onclick="event.stopPropagation()">
             <div class="px-4 py-3 border-b flex items-center justify-between">
-                <div class="font-semibold">Capture</div>
-                <button id="close-modal" class="text-gray-500 hover:text-gray-700"><i class="fa-solid fa-xmark"></i></button>
+                <div class="font-semibold">Capture Sign Language</div>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="p-4 space-y-3">
                 <video id="cam" class="w-full rounded-lg bg-black" autoplay playsinline muted></video>
                 <canvas id="canvas" class="hidden"></canvas>
                 <div class="flex gap-2">
-                    <button id="snap" class="flex-1 bg-emerald-500 text-white rounded-md py-2 hover:bg-emerald-600"><i class="fa-solid fa-camera"></i> <span class="ml-1">Image</span></button>
-                    <button id="rec" class="flex-1 bg-emerald-100 text-emerald-700 rounded-md py-2 hover:bg-emerald-200"><i class="fa-solid fa-video"></i> <span class="ml-1">Record</span></button>
+                    <button id="snap" class="flex-1 bg-blue-600 text-white rounded-md py-2 hover:bg-blue-700 transition-colors"><i class="fa-solid fa-camera"></i> <span class="ml-1">Capture Image</span></button>
+                    <button id="rec" class="flex-1 bg-blue-100 text-blue-700 rounded-md py-2 hover:bg-blue-200 transition-colors"><i class="fa-solid fa-video"></i> <span class="ml-1" id="rec-text">Record Video</span></button>
                 </div>
-                <div class="text-xs text-gray-500">Tip: keep signs centered and well-lit.</div>
+                <div class="text-xs text-gray-500 text-center">Tip: Keep signs centered and well-lit. Record 2-5 seconds for best results.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-2xl overflow-hidden shadow-xl mx-4" onclick="event.stopPropagation()">
+            <div class="px-5 py-4 border-b flex items-center justify-between">
+                <div class="font-semibold">SignAI Access</div>
+                <button id="close-auth" class="text-gray-500 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-5">
+                <div class="flex gap-2 mb-4">
+                    <button id="tab-login" class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-sm">Login</button>
+                    <button id="tab-signup" class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm">Sign Up</button>
+                </div>
+
+                <div id="login-form" class="space-y-3">
+                    <input id="login-username" type="text" placeholder="Username" class="w-full rounded-lg border-2 border-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-blue-400">
+                    <div class="relative">
+                        <input id="login-password" type="password" placeholder="Password" class="w-full rounded-lg border-2 border-gray-200 px-4 py-2 pr-10 text-sm focus:outline-none focus:border-blue-400">
+                        <button id="toggle-login-password" type="button" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600" aria-label="Show password" title="Show password">
+                            <i id="toggle-login-password-icon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <button id="login-submit" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm">Login</button>
+                    <div id="login-error" class="text-xs text-red-500 hidden"></div>
+                </div>
+
+                <div id="signup-form" class="space-y-3 hidden">
+                    <input id="signup-username" type="text" placeholder="Username" class="w-full rounded-lg border-2 border-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-blue-400">
+                    <input id="signup-email" type="email" placeholder="Email (optional)" class="w-full rounded-lg border-2 border-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-blue-400">
+                    <input id="signup-password" type="password" placeholder="Password" class="w-full rounded-lg border-2 border-gray-200 px-4 py-2 text-sm focus:outline-none focus:border-blue-400">
+                    <button id="signup-submit" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm">Create Account</button>
+                    <div id="signup-error" class="text-xs text-red-500 hidden"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -280,31 +357,392 @@
     <script>
         const chat = document.getElementById('chat');
         const cameraBtn = document.getElementById('camera-btn');
+        const uploadBtn = document.getElementById('upload-btn');
         const textToSignBtn = document.getElementById('text-to-sign-btn');
         const textInput = document.getElementById('text-input');
         const fileInput = document.getElementById('file-input');
-        const kindSelect = document.getElementById('kind-select');
+        const langSelect = document.getElementById('lang-select');
+        const modeSelect = document.getElementById('mode-select');
+        const autoModeStatus = document.getElementById('auto-mode-status');
         const modal = document.getElementById('camera-modal');
         const closeModal = document.getElementById('close-modal');
         const videoEl = document.getElementById('cam');
         const canvas = document.getElementById('canvas');
         const snapBtn = document.getElementById('snap');
         const recBtn = document.getElementById('rec');
+        const recText = document.getElementById('rec-text');
+        const authModal = document.getElementById('auth-modal');
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userPill = document.getElementById('user-pill');
+        const usernameDisplay = document.getElementById('username-display');
+        const dashboardBtn = document.getElementById('dashboard-btn');
+        const dictionaryBtn = document.getElementById('dictionary-btn');
+        const closeAuth = document.getElementById('close-auth');
+        const tabLogin = document.getElementById('tab-login');
+        const tabSignup = document.getElementById('tab-signup');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const loginSubmit = document.getElementById('login-submit');
+        const signupSubmit = document.getElementById('signup-submit');
+        const loginError = document.getElementById('login-error');
+        const signupError = document.getElementById('signup-error');
+        const loginUsername = document.getElementById('login-username');
+        const loginPassword = document.getElementById('login-password');
+        const toggleLoginPasswordBtn = document.getElementById('toggle-login-password');
+        const toggleLoginPasswordIcon = document.getElementById('toggle-login-password-icon');
+        const signupUsername = document.getElementById('signup-username');
+        const signupPassword = document.getElementById('signup-password');
+        const signupEmail = document.getElementById('signup-email');
 
         let mediaStream = null;
         let mediaRecorder = null;
         let chunks = [];
         let imageCount = 0;
         let videoCount = 0;
+        let isRecording = false;
+        let isAuthenticated = false;
+        let activeConversationId = null;
+        const MAX_VISIBLE_CHATS = 3;
+        let showAllChats = false;
+
+        function formatModeLabel(modeValue) {
+            if (modeValue === 'auto') return 'Auto Mode ON';
+            return 'Mode: ' + modeValue.charAt(0).toUpperCase() + modeValue.slice(1);
+        }
+
+        function updateModeStatusLabel() {
+            if (!modeSelect || !autoModeStatus) return;
+            autoModeStatus.textContent = formatModeLabel(modeSelect.value || 'auto');
+        }
+        
+        // ===== Conversation Management Functions =====
+        
+        /**
+         * Load the list of conversations from the API and populate the sidebar
+         */
+        async function loadConversations() {
+            if (!isAuthenticated) return;
+            
+            try {
+                const [resMain, resArchived] = await Promise.all([
+                    fetch('/api/conversations'),
+                    fetch('/api/conversations?archived=1')
+                ]);
+                const dataMain = await resMain.json();
+                const dataArchived = await resArchived.json();
+                const conversations = dataMain.conversations || [];
+                const archived = dataArchived.conversations || [];
+                const list = document.getElementById('conversations-list');
+                
+                list.innerHTML = '';
+
+                if (!Array.isArray(conversations) || conversations.length === 0) {
+                    list.innerHTML = '<div class="text-xs text-gray-500 text-center py-8">No chats yet. Start a new one!</div>';
+                } else {
+                    const allRecent = conversations;
+                    let visibleRecent = allRecent;
+
+                    if (!showAllChats && allRecent.length > MAX_VISIBLE_CHATS) {
+                        visibleRecent = allRecent.slice(0, MAX_VISIBLE_CHATS);
+
+                        // Keep the active chat visible in compact mode.
+                        if (activeConversationId && !visibleRecent.some(c => c.id === activeConversationId)) {
+                            const activeChat = allRecent.find(c => c.id === activeConversationId);
+                            if (activeChat) {
+                                visibleRecent = visibleRecent.slice(0, MAX_VISIBLE_CHATS - 1).concat(activeChat);
+                            }
+                        }
+                    }
+
+                    list.appendChild(renderSectionHeader('🟢 Recent'));
+                    visibleRecent.forEach(conv => list.appendChild(renderConversationItem(conv)));
+
+                    const visibleIds = new Set(visibleRecent.map(c => c.id));
+                    const hiddenCount = allRecent.filter(c => !visibleIds.has(c.id)).length;
+                    if (hiddenCount > 0 || showAllChats) {
+                        list.appendChild(renderShowAllToggleButton(hiddenCount));
+                    }
+                }
+
+                if (showAllChats && Array.isArray(archived) && archived.length) {
+                    list.appendChild(renderSectionHeader('📂 Archived'));
+                    archived.forEach(conv => list.appendChild(renderConversationItem(conv)));
+                }
+            } catch (e) {
+                console.error('Failed to load conversations:', e);
+            }
+        }
+
+        function renderShowAllToggleButton(hiddenCount) {
+            const button = document.createElement('button');
+            button.className = 'w-full mt-2 px-3 py-2 rounded-lg text-sm text-slate-700 bg-white/70 hover:bg-white transition-all';
+            button.title = showAllChats ? 'Show only recent chats' : 'Show all chats';
+            button.textContent = showAllChats ? '... Show less' : `... Show all (${hiddenCount})`;
+            button.onclick = () => {
+                showAllChats = !showAllChats;
+                loadConversations();
+            };
+            return button;
+        }
+
+        function renderSectionHeader(label) {
+            const header = document.createElement('div');
+            header.className = 'text-xs font-semibold text-gray-600 mt-3 mb-2';
+            header.textContent = label;
+            return header;
+        }
+
+        function renderConversationItem(conv) {
+            const wrap = document.createElement('div');
+            wrap.className = 'group px-3 py-2 rounded-lg hover:bg-white/20 transition-all';
+
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between gap-2';
+
+            const btn = document.createElement('button');
+            btn.className = 'flex-1 text-left text-sm text-gray-700 truncate ' +
+                (conv.id === activeConversationId ? 'font-semibold' : '');
+            btn.innerHTML = `<i class="fa-solid fa-comments mr-2"></i>${conv.title || 'Untitled Chat'}`;
+            btn.onclick = () => loadConversation(conv.id);
+
+            const dots = document.createElement('div');
+            dots.className = 'text-slate-500 text-sm px-2';
+            dots.textContent = '...';
+
+            row.appendChild(btn);
+            row.appendChild(dots);
+
+            const actions = document.createElement('div');
+            actions.className = 'mt-2 hidden group-hover:flex gap-2 flex-wrap';
+
+            const renameBtn = document.createElement('button');
+            renameBtn.className = 'px-2 py-1 rounded-md text-xs text-slate-700 bg-white/70 hover:bg-white';
+            renameBtn.textContent = 'Rename';
+            renameBtn.onclick = (e) => {
+                e.stopPropagation();
+                handleRenameConversation(conv.id, conv.title || '');
+            };
+
+            const pinBtn = document.createElement('button');
+            pinBtn.className = 'px-2 py-1 rounded-md text-xs text-slate-700 bg-white/70 hover:bg-white';
+            pinBtn.textContent = conv.is_pinned === 1 ? 'Unpin' : 'Pin';
+            pinBtn.onclick = (e) => {
+                e.stopPropagation();
+                togglePinConversation(conv.id);
+            };
+
+            const archiveBtn = document.createElement('button');
+            archiveBtn.className = 'px-2 py-1 rounded-md text-xs text-slate-700 bg-white/70 hover:bg-white';
+            archiveBtn.textContent = conv.is_archived === 1 ? 'Unarchive' : 'Archive';
+            archiveBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleArchiveConversation(conv.id);
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'px-2 py-1 rounded-md text-xs text-red-600 bg-white/70 hover:bg-red-50';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                deleteConversation(conv.id);
+            };
+
+            actions.appendChild(renameBtn);
+            actions.appendChild(pinBtn);
+            actions.appendChild(archiveBtn);
+            actions.appendChild(deleteBtn);
+
+            wrap.appendChild(row);
+            wrap.appendChild(actions);
+            return wrap;
+        }
+        
+        /**
+         * Create a new conversation and set it as active
+         */
+        async function createNewConversation(silent = false) {
+            if (!isAuthenticated) {
+                showAuthModal();
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: 'New Chat' })
+                });
+                const data = await res.json();
+                if (data.conversation && data.conversation.id) {
+                    activeConversationId = data.conversation.id;
+                    clearChat();
+                    loadConversations();
+                    if (!silent) {
+                        addBubble('👋 New conversation started. Type or upload to get started!');
+                    }
+                } else {
+                    console.error('Invalid response:', data);
+                    if (!silent) {
+                        addBubble('❌ Failed to create new conversation');
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to create conversation:', e);
+                if (!silent) {
+                    addBubble('❌ Failed to create new conversation');
+                }
+            }
+        }
+
+        async function ensureDefaultConversation() {
+            if (activeConversationId || !isAuthenticated) return;
+            try {
+                const res = await fetch('/api/conversations');
+                const data = await res.json();
+                const conversations = data.conversations || [];
+                if (conversations.length > 0) {
+                    activeConversationId = conversations[0].id;
+                    await loadConversation(activeConversationId);
+                } else {
+                    await createNewConversation(true);
+                }
+            } catch (e) {
+                console.error('Failed to ensure default conversation:', e);
+            }
+        }
+
+        async function handleRenameConversation(conversationId, currentTitle) {
+            const nextTitle = prompt('Rename chat:', currentTitle || '');
+            if (!nextTitle || !nextTitle.trim()) return;
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}/rename`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: nextTitle.trim() })
+                });
+                if (!res.ok) return;
+                await res.json();
+                loadConversations();
+            } catch (e) {
+                console.error('Rename failed:', e);
+            }
+        }
+
+        async function togglePinConversation(conversationId) {
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}/pin`, { method: 'POST' });
+                if (!res.ok) return;
+                await res.json();
+                loadConversations();
+            } catch (e) {
+                console.error('Pin toggle failed:', e);
+            }
+        }
+
+        async function toggleArchiveConversation(conversationId) {
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}/archive`, { method: 'POST' });
+                if (!res.ok) return;
+                await res.json();
+                if (activeConversationId === conversationId) {
+                    activeConversationId = null;
+                    clearChat();
+                }
+                loadConversations();
+            } catch (e) {
+                console.error('Archive toggle failed:', e);
+            }
+        }
+
+        async function deleteConversation(conversationId) {
+            if (!confirm('Delete this chat and all messages?')) return;
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}`, { method: 'DELETE' });
+                if (!res.ok) return;
+                if (activeConversationId === conversationId) {
+                    activeConversationId = null;
+                    clearChat();
+                }
+                loadConversations();
+            } catch (e) {
+                console.error('Delete failed:', e);
+            }
+        }
+        
+        /**
+         * Load a specific conversation and display its messages
+         */
+        async function loadConversation(conversationId) {
+            if (!isAuthenticated) {
+                showAuthModal();
+                return;
+            }
+            
+            try {
+                const res = await fetch(`/api/conversations/${conversationId}`);
+                if (!res.ok) {
+                    addBubble('❌ Unable to load conversation');
+                    return;
+                }
+                const data = await res.json();
+                
+                activeConversationId = conversationId;
+                clearChat();
+                loadConversations(); // Refresh list to highlight active
+                
+                // Display conversation messages
+                if (data.messages && Array.isArray(data.messages)) {
+                    data.messages.forEach(msg => {
+                        if (msg.message_type === 'video') {
+                            if (msg.sender === 'system') {
+                                addSignVideoBubble(msg.text_content || 'Sign', msg.video_path, []);
+                            } else {
+                                addMediaUrlBubble(msg.video_path, 'user');
+                            }
+                            return;
+                        }
+
+                        if (msg.sender === 'system' && msg.prediction) {
+                            const predData = {
+                                prediction: msg.text_content || msg.prediction,
+                                confidence: msg.confidence || 0,
+                                lang: 'en',
+                                tts_audio: null,
+                                tts_url: null
+                            };
+                            addEnhancedPredictionBubble(predData.prediction, predData);
+                        } else if (msg.sender === 'system') {
+                            addBubble(msg.text_content || 'System message', 'app');
+                        } else if (msg.sender === 'user') {
+                            addBubble(msg.text_content || 'User message', 'user');
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Failed to load conversation:', e);
+                addBubble('❌ Failed to load conversation');
+            }
+        }
+        
+        /**
+         * Clear all messages from chat area and reset to welcome screen
+         */
+        function clearChat() {
+            chat.innerHTML = '<div class="flex justify-center"><div class="inline-flex items-center gap-2 text-sm bg-white px-6 py-3 rounded-full shadow-md"><span class="text-2xl">👋</span><span class="text-gray-700 font-medium">Welcome! Upload or type to get started</span></div></div>';
+            chat.scrollTop = 0;
+        }
         
         // Update stats
         function updateStats(type) {
             if (type === 'image') {
                 imageCount++;
-                document.getElementById('stat-images').textContent = imageCount;
+                const imageStatEl = document.getElementById('stat-images');
+                if (imageStatEl) imageStatEl.textContent = imageCount;
             } else if (type === 'video') {
                 videoCount++;
-                document.getElementById('stat-videos').textContent = videoCount;
+                const videoStatEl = document.getElementById('stat-videos');
+                if (videoStatEl) videoStatEl.textContent = videoCount;
             }
         }
 
@@ -319,6 +757,199 @@
             wrapper.appendChild(bubble);
             chat.appendChild(wrapper);
             chat.scrollTop = chat.scrollHeight;
+        }
+
+        function addModeSuggestionBubble(warningText, suggestedMode) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex justify-start';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'max-w-[85%] bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-2xl rounded-tl-md shadow-sm';
+
+            const msg = document.createElement('div');
+            msg.className = 'text-sm';
+            msg.textContent = warningText || 'Mode mismatch detected.';
+            bubble.appendChild(msg);
+
+            if (suggestedMode && modeSelect) {
+                const actionRow = document.createElement('div');
+                actionRow.className = 'mt-2';
+
+                const switchBtn = document.createElement('button');
+                switchBtn.className = 'px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-medium';
+                switchBtn.textContent = `Switch to ${suggestedMode.charAt(0).toUpperCase() + suggestedMode.slice(1)} mode`;
+                switchBtn.onclick = () => {
+                    modeSelect.value = suggestedMode;
+                    addBubble(`Switched to ${suggestedMode} mode.`, 'app');
+                };
+
+                actionRow.appendChild(switchBtn);
+                bubble.appendChild(actionRow);
+            }
+
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function showAuthModal() {
+            authModal.classList.remove('hidden');
+            authModal.classList.add('flex');
+        }
+
+        function hideAuthModal() {
+            authModal.classList.add('hidden');
+            authModal.classList.remove('flex');
+        }
+
+        function setAuthUI(authenticated, username) {
+            isAuthenticated = Boolean(authenticated);
+            if (isAuthenticated) {
+                loginBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                userPill.classList.remove('hidden');
+                dashboardBtn.classList.remove('hidden');
+                dictionaryBtn.classList.remove('hidden');
+                usernameDisplay.textContent = username || 'User';
+                hideAuthModal();
+                loadConversations(); // Load conversations when user logs in
+            } else {
+                loginBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                userPill.classList.add('hidden');
+                dashboardBtn.classList.add('hidden');
+                dictionaryBtn.classList.add('hidden');
+            }
+        }
+
+        function requireAuth() {
+            if (!isAuthenticated) {
+                showAuthModal();
+                return false;
+            }
+            return true;
+        }
+
+        async function checkSession() {
+            try {
+                const res = await fetch('/api/session');
+                const data = await res.json();
+                if (data && data.logged_in) {
+                    setAuthUI(true, data.user && data.user.username);
+                    activeConversationId = null;
+                    clearChat();
+                    loadConversations();
+                    await ensureDefaultConversation();
+                } else {
+                    setAuthUI(false);
+                }
+            } catch (e) {
+                setAuthUI(false);
+            }
+        }
+
+        async function doLogin() {
+            loginError.classList.add('hidden');
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+            if (!username || !password) {
+                loginError.textContent = 'Username and password are required.';
+                loginError.classList.remove('hidden');
+                            // Set loading state
+                            const originalButtonText = loginSubmit.textContent;
+                            loginSubmit.disabled = true;
+                            loginSubmit.classList.add('opacity-75');
+                            loginSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Logging in...';
+
+                return;
+            }
+            try {
+                const res = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    setAuthUI(true, data.user && data.user.username);
+                    clearChat();
+                    
+                    activeConversationId = null;
+                    clearChat();
+                    loadConversations();
+                    await ensureDefaultConversation();
+                    
+                    if (data.needs_welcome) {
+                        window.location.href = '/welcome';
+                    }
+                } else {
+                    loginError.textContent = data.error || 'Login failed.';
+                    // Reset loading state on error
+                    loginSubmit.disabled = false;
+                    loginSubmit.classList.remove('opacity-75');
+                    loginSubmit.textContent = originalButtonText;
+                }
+            } catch (e) {
+                loginError.textContent = 'Unable to reach server.';
+                // Reset loading state on error
+                loginSubmit.disabled = false;
+                loginSubmit.classList.remove('opacity-75');
+                loginSubmit.textContent = originalButtonText;
+            }
+        }
+
+        async function doSignup() {
+            signupError.classList.add('hidden');
+            const username = signupUsername.value.trim();
+            const password = signupPassword.value.trim();
+            const email = signupEmail.value.trim();
+            if (!username || !password) {
+                signupError.textContent = 'Username and password are required.';
+                signupError.classList.remove('hidden');
+                            // Set loading state
+                            const originalButtonText = signupSubmit.textContent;
+                            signupSubmit.disabled = true;
+                            signupSubmit.classList.add('opacity-75');
+                            signupSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Creating account...';
+
+                return;
+            }
+            try {
+                const res = await fetch('/auth/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, email })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    tabLogin.click();
+                    addBubble('✅ Account created. Please log in.');
+                    loginUsername.value = username;
+                    loginPassword.focus();
+                } else {
+                    signupError.textContent = data.error || 'Signup failed.';
+                        // Reset loading state on error
+                        signupSubmit.disabled = false;
+                        signupSubmit.classList.remove('opacity-75');
+                        signupSubmit.textContent = originalButtonText;
+                    signupError.classList.remove('hidden');
+                }
+            } catch (e) {
+                signupError.textContent = 'Unable to reach server.';
+                // Reset loading state on error
+                signupSubmit.disabled = false;
+                signupSubmit.classList.remove('opacity-75');
+                signupSubmit.textContent = originalButtonText;
+                signupError.classList.remove('hidden');
+            }
+        }
+
+        async function doLogout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+            } catch (_) {}
+            setAuthUI(false);
+            window.location.href = '/';
         }
         
         function addLoadingBubble() {
@@ -338,12 +969,74 @@
             if (loading) loading.remove();
         }
 
+        const sharedAudio = new Audio();
+        sharedAudio.preload = 'none';
+        
+        /** Fetch TTS from API and play - used when pre-generated TTS is not available */
+        async function speakTextViaAPI(text, lang) {
+            if (!text || !text.trim()) return;
+            try {
+                const res = await fetch('/api/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text.trim(), lang: lang || langSelect.value || 'en' })
+                });
+                const data = await res.json();
+                if (data.success && (data.audio_base64 || data.url)) {
+                    playTTS({
+                        tts_audio: data.audio_base64 || null,
+                        tts_mime: data.mime || 'audio/mpeg',
+                        tts_url: data.url || null
+                    });
+                } else {
+                    console.warn('TTS failed:', data.error || 'No audio returned');
+                }
+            } catch (e) {
+                console.error('TTS API error:', e);
+            }
+        }
+        
+        function playTTS(data) {
+            const mime = data.tts_mime || 'audio/mpeg';
+            let srcUrl = '';
+            let revokeLater = false;
+            try {
+                if (data.tts_audio) {
+                    const bstr = atob(data.tts_audio);
+                    const buf = new Uint8Array(bstr.length);
+                    for (let i = 0; i < bstr.length; i++) buf[i] = bstr.charCodeAt(i);
+                    const blob = new Blob([buf], { type: mime });
+                    srcUrl = URL.createObjectURL(blob);
+                    revokeLater = true;
+                } else if (data.tts_url) {
+                    srcUrl = data.tts_url.startsWith('http') ? data.tts_url : `${location.origin}${data.tts_url}`;
+                }
+            } catch (e) {
+                console.error('Failed to prepare TTS audio:', e);
+                return;
+            }
+            if (!srcUrl) return;
+            // Reset so the same Audio element can play again (fixes "works once then stops")
+            sharedAudio.pause();
+            sharedAudio.currentTime = 0;
+            sharedAudio.src = srcUrl;
+            sharedAudio.onended = () => {
+                if (revokeLater) {
+                    try { URL.revokeObjectURL(srcUrl); } catch (_) {}
+                }
+            };
+            sharedAudio.load(); // required after changing src so second and later plays work
+            sharedAudio.play().catch(err => {
+                console.error('TTS playback error:', err);
+            });
+        }
+
         function addMediaBubble(file, who='user') {
             const wrapper = document.createElement('div');
             wrapper.className = 'msg-enter flex ' + (who === 'user' ? 'justify-end' : 'justify-start');
             const bubble = document.createElement('div');
             bubble.className = (who === 'user')
-                ? 'max-w-[80%] bg-emerald-100 text-emerald-900 p-2 rounded-2xl rounded-tr-sm shadow'
+                ? 'max-w-[80%] bg-blue-100 text-slate-900 p-2 rounded-2xl rounded-tr-sm shadow'
                 : 'max-w-[80%] bg-white text-gray-900 p-2 rounded-2xl rounded-tl-sm shadow';
 
             const url = URL.createObjectURL(file);
@@ -370,70 +1063,314 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
+        function addMediaUrlBubble(url, who='user') {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex ' + (who === 'user' ? 'justify-end' : 'justify-start');
+            const bubble = document.createElement('div');
+            bubble.className = (who === 'user')
+                ? 'max-w-[80%] bg-blue-100 text-slate-900 p-2 rounded-2xl rounded-tr-sm shadow'
+                : 'max-w-[80%] bg-white text-gray-900 p-2 rounded-2xl rounded-tl-sm shadow';
+
+            const lowerUrl = (url || '').toLowerCase();
+            if (lowerUrl.match(/\.(png|jpe?g|webp|bmp)$/)) {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = 'image';
+                img.className = 'rounded-lg max-h-64 object-contain';
+                bubble.appendChild(img);
+            } else {
+                const vid = document.createElement('video');
+                vid.src = url;
+                vid.controls = true;
+                vid.playsInline = true;
+                vid.muted = true;
+                vid.className = 'rounded-lg max-h-64';
+                bubble.appendChild(vid);
+            }
+
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function ensureActiveConversation() {
+            if (activeConversationId) return true;
+            await ensureDefaultConversation();
+            return Boolean(activeConversationId);
+        }
+
+        function detectUploadFileType(file) {
+            const name = (file?.name || '').toLowerCase();
+            const mime = (file?.type || '').toLowerCase();
+
+            if (mime.startsWith('image/') || /\.(jpg|jpeg|png|bmp|webp)$/i.test(name)) {
+                return 'image';
+            }
+
+            if (mime.startsWith('video/') || /\.(mp4|avi|mov|mkv|webm)$/i.test(name)) {
+                return 'video';
+            }
+
+            return 'unknown';
+        }
+
         async function sendFile(file) {
+            if (!requireAuth()) return;
+            if (!await ensureActiveConversation()) return;
+            if (!file) return;
+            
+            const fileType = detectUploadFileType(file);
+            if (fileType === 'unknown') {
+                addBubble('❌ Unsupported file type. Please upload an image or video file.');
+                return;
+            }
+
             addMediaBubble(file, 'user');
             addLoadingBubble();
             
             // Update stats
-            if (file.type.startsWith('image')) {
+            if (fileType === 'image') {
                 updateStats('image');
-            } else if (file.type.startsWith('video')) {
+            } else if (fileType === 'video') {
                 updateStats('video');
             }
             
+            const lang = langSelect.value || 'en';
+            const mode = modeSelect ? (modeSelect.value || 'auto') : 'auto';
+            const endpoint = fileType === 'video' ? '/predict_dynamic' : '/predict_static';
+            const fileField = fileType === 'video' ? 'video' : 'image';
             const form = new FormData();
-            form.append('file', file);
-            const kind = kindSelect.value;
-            if (kind) form.append('kind', kind);
+            form.append(fileField, file);
+            form.append('lang', lang);
+            form.append('mode', mode);
+            form.append('conversation_id', String(activeConversationId));
+            
             try {
-                const res = await fetch('/predict', { method: 'POST', body: form });
+                console.log(`[UPLOAD_ROUTE] fileType=${fileType}, mode=${mode}, endpoint=${endpoint}`);
+                const res = await fetch(endpoint, { method: 'POST', body: form });
+                const contentType = (res.headers.get('content-type') || '').toLowerCase();
+                if (res.status === 401 || (res.redirected && res.url.includes('/login'))) {
+                    removeLoadingBubble();
+                    showAuthModal();
+                    addBubble('⚠️ Please login to use predictions.');
+                    return;
+                }
+                if (!contentType.includes('application/json')) {
+                    removeLoadingBubble();
+                    addBubble('❌ Server returned an unexpected response. Please login and try again.');
+                    return;
+                }
                 const data = await res.json();
                 removeLoadingBubble();
-                if (res.ok) {
-                    const pred = data.prediction || 'No prediction';
-                    addBubble(String(pred));
+
+                if (data.mode_mismatch) {
+                    const mismatchMessage = data.error || data.warning || 'Mode mismatch detected. Please try again with the correct sign type.';
+                    const isStaticMismatch = /number sign|letter sign|A-Z|0-9|alphabet mode|number mode/i.test(mismatchMessage);
+                    addModeSuggestionBubble(
+                        mismatchMessage,
+                        isStaticMismatch ? null : (data.suggested_mode || 'sentence')
+                    );
+                    return;
+                }
+                
+                if (res.ok && data.prediction) {
+                    const pred = data.prediction;
+                    if (pred === 'unable to recognize') {
+                        addBubble('⚠️ Unable to recognize sign. Please try again with clearer lighting or a different angle.');
+                    } else {
+                        // Enhanced prediction display with confidence and TTS
+                        addEnhancedPredictionBubble(pred, data);
+                    }
                 } else {
-                    addBubble('Error: ' + (data.error || 'Unknown error'));
+                    const errorMsg = data.error || data.prediction || 'Unknown error occurred';
+                    if (data.recommended_model) {
+                        addBubble('Model suggestion: ' + data.recommended_model + '. Please try again.');
+                    }
+                    addBubble('❌ Error: ' + String(errorMsg));
                 }
             } catch (e) {
                 removeLoadingBubble();
-                addBubble('❌ Connection error: ' + String(e));
+                addBubble('❌ Connection error: Unable to reach server. Please check your connection.');
+                console.error('API Error:', e);
             }
         }
 
         async function sendTextToSign(text) {
+            if (!requireAuth()) return;
+            if (!await ensureActiveConversation()) return;
             if (!text.trim()) return;
             
             addBubble(text, 'user');
+            addLoadingBubble();
+            const lang = langSelect.value || 'en';
+            const mode = modeSelect ? (modeSelect.value || 'auto') : 'auto';
+            
             try {
                 const res = await fetch('/text_to_sign', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
+                    body: JSON.stringify({
+                        text: text,
+                        lang: lang,
+                        mode: mode,
+                        conversation_id: activeConversationId
+                    })
                 });
+                const contentType = (res.headers.get('content-type') || '').toLowerCase();
+                if (res.status === 401 || (res.redirected && res.url.includes('/login'))) {
+                    removeLoadingBubble();
+                    showAuthModal();
+                    addBubble('⚠️ Please login to continue.');
+                    return;
+                }
+                if (!contentType.includes('application/json')) {
+                    removeLoadingBubble();
+                    addBubble('❌ Server returned an unexpected response. Please login and try again.');
+                    return;
+                }
                 const data = await res.json();
+                removeLoadingBubble();
                 
                 if (res.ok && data.success) {
+                    let foundAny = false;
                     // Prefer full phrase video if available
                     if (data.phrase && data.phrase.url) {
                         addSignVideoBubble(data.phrase.text || 'Phrase', data.phrase.url, []);
-                    } else if (Array.isArray(data.words)) {
+                        foundAny = true;
+                    } else if (Array.isArray(data.words) && data.words.length > 0) {
                         for (const wordData of data.words) {
                             if (wordData.url) {
-                                addSignVideoBubble(wordData.word, wordData.url, wordData.synonyms);
+                                addSignVideoBubble(wordData.word, wordData.url, wordData.synonyms || []);
+                                foundAny = true;
                             }
                         }
                     }
-                    if (Array.isArray(data.missing) && data.missing.length) {
-                        const msgs = data.missing.map(m => `${m.word}: ${m.message}`).join('; ');
-                        addBubble(`Note: ${msgs}`);
+                    
+                    if (Array.isArray(data.missing) && data.missing.length > 0) {
+                        const availableList = Array.isArray(data.available) ? data.available : [];
+                        addMissingWordsBubble(availableList, data.missing);
+                    }
+                    
+                    if (!foundAny) {
+                        addBubble('⚠️ No sign language videos found for the entered text.');
                     }
                 } else {
-                    addBubble(data.error || 'Error converting text to sign');
+                    addBubble('❌ Error: ' + (data.error || 'Failed to convert text to sign'));
                 }
             } catch (e) {
-                addBubble('Error: ' + String(e));
+                removeLoadingBubble();
+                addBubble('❌ Connection error: Unable to reach server. Please check your connection.');
+                console.error('Text-to-Sign Error:', e);
             }
+        }
+
+        function addEnhancedPredictionBubble(prediction, data) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex justify-start';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'max-w-[80%] bubble-app px-5 py-4 rounded-3xl rounded-tl-md shadow-lg';
+            
+            // Prediction text
+            const mainText = document.createElement('div');
+            mainText.className = 'font-bold text-xl mb-1';
+
+            const lang = data.lang || 'en';
+            const translated = data.translated || prediction;
+
+            if (lang !== 'en') {
+                mainText.textContent = '✅ ' + translated;
+                const titleRow = document.createElement('div');
+                titleRow.className = 'flex items-center gap-3 mb-1';
+                titleRow.appendChild(mainText);
+                const ttsBtn = document.createElement('button');
+                ttsBtn.className = 'px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs flex items-center gap-2';
+                ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i><span>Listen</span>';
+                ttsBtn.title = 'Play voice output';
+                ttsBtn.onclick = () => (data.tts_audio || data.tts_url) ? playTTS(data) : speakTextViaAPI(translated, lang);
+                titleRow.appendChild(ttsBtn);
+                bubble.appendChild(titleRow);
+
+                const subText = document.createElement('div');
+                subText.className = 'text-xs text-gray-300 mb-1';
+                subText.textContent = `(${prediction} - English)`;
+                bubble.appendChild(subText);
+            } else {
+                mainText.textContent = '✅ ' + prediction;
+                const titleRow = document.createElement('div');
+                titleRow.className = 'flex items-center gap-3 mb-1';
+                titleRow.appendChild(mainText);
+                const ttsBtn = document.createElement('button');
+                ttsBtn.className = 'px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs flex items-center gap-2';
+                ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i><span>Listen</span>';
+                ttsBtn.title = 'Play voice output';
+                ttsBtn.onclick = () => (data.tts_audio || data.tts_url) ? playTTS(data) : speakTextViaAPI(prediction, lang);
+                titleRow.appendChild(ttsBtn);
+                bubble.appendChild(titleRow);
+            }
+            
+            // Confidence score
+            if (data.confidence !== undefined) {
+                const confDiv = document.createElement('div');
+                confDiv.className = 'text-sm mb-2';
+                const confPercent = (data.confidence * 100).toFixed(1);
+                confDiv.innerHTML = `<span class="font-medium">Confidence: ${confPercent}%</span>`;
+                bubble.appendChild(confDiv);
+                
+                // Confidence visualization
+                if (data.confidence_image) {
+                    const confImg = document.createElement('img');
+                    confImg.src = 'data:image/png;base64,' + data.confidence_image;
+                    confImg.className = 'w-full max-w-md mb-2 rounded';
+                    bubble.appendChild(confImg);
+                }
+            }
+            
+            // Model info
+            if (data.model_type) {
+                const modelDiv = document.createElement('div');
+                modelDiv.className = 'text-xs text-gray-400 mb-2';
+                modelDiv.textContent = `Model: ${data.model_type} | Time: ${data.processing_time || 'N/A'}s`;
+                bubble.appendChild(modelDiv);
+            }
+            
+            // Feedback button
+            const feedbackBtn = document.createElement('button');
+            feedbackBtn.className = 'ml-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm';
+            feedbackBtn.innerHTML = '<i class="fa-solid fa-comment"></i> <span>Feedback</span>';
+            feedbackBtn.onclick = () => showFeedbackModal(prediction, data, data.prediction_id);
+            bubble.appendChild(feedbackBtn);
+            
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        function showFeedbackModal(prediction, data, predictionId) {
+            if (!requireAuth()) return;
+            const actualLabel = prompt('Was the prediction correct? If not, enter the correct sign:', prediction);
+            if (actualLabel === null) return;
+            
+            fetch('/feedback/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    prediction_id: predictionId || null,
+                    original_text: prediction,
+                    correction_text: actualLabel
+                })
+            }).then(res => res.json())
+              .then(result => {
+                  if (result.success) {
+                      addBubble('✅ Thank you for your feedback!');
+                  } else {
+                      addBubble('❌ Failed to submit feedback');
+                  }
+              })
+              .catch(e => {
+                  console.error('Feedback error:', e);
+                  addBubble('❌ Error submitting feedback');
+              });
         }
 
         function addSignVideoBubble(word, mediaUrl, synonyms) {
@@ -443,19 +1380,32 @@
             const bubble = document.createElement('div');
             bubble.className = 'max-w-[80%] bg-white text-gray-900 p-3 rounded-2xl rounded-tl-sm shadow';
             
-            // Word title
+            // Word title with voice output button
+            const titleRow = document.createElement('div');
+            titleRow.className = 'flex items-center gap-2 mb-2';
             const wordTitle = document.createElement('div');
-            wordTitle.className = 'font-semibold text-lg mb-2';
+            wordTitle.className = 'font-semibold text-lg';
             wordTitle.textContent = word;
-            bubble.appendChild(wordTitle);
+            titleRow.appendChild(wordTitle);
+            const ttsBtn = document.createElement('button');
+            ttsBtn.className = 'p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm flex items-center gap-1';
+            ttsBtn.title = 'Play voice output';
+            ttsBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i><span>Listen</span>';
+            ttsBtn.onclick = () => speakTextViaAPI(word, langSelect.value || 'en');
+            titleRow.appendChild(ttsBtn);
+            bubble.appendChild(titleRow);
             
-            // Detect image vs video by extension
-            const isImage = /\.(png|jpe?g|webp)$/i.test(mediaUrl);
+            // Detect image vs video by extension or URL pattern
+            const isImage = /\.(png|jpe?g|webp)$/i.test(mediaUrl) || mediaUrl.includes('/static_image/');
             if (isImage) {
                 const img = document.createElement('img');
                 img.src = mediaUrl;
                 img.alt = word;
                 img.className = 'rounded-lg max-h-64 w-full object-contain';
+                img.onerror = () => {
+                    img.alt = 'Image failed to load';
+                    img.style.border = '2px dashed #ef4444';
+                };
                 bubble.appendChild(img);
             } else {
                 const video = document.createElement('video');
@@ -464,6 +1414,12 @@
                 video.playsInline = true;
                 video.muted = true;
                 video.className = 'rounded-lg max-h-64 w-full';
+                video.onerror = () => {
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'text-red-500 text-sm p-2';
+                    errorMsg.textContent = 'Video failed to load';
+                    video.parentNode.replaceChild(errorMsg, video);
+                };
                 bubble.appendChild(video);
             }
             
@@ -480,9 +1436,164 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
-        cameraBtn.addEventListener('click', () => {
+        function addMissingWordsBubble(availableWords, missingItems) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'msg-enter flex justify-start';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'max-w-[85%] bg-white text-gray-900 p-4 rounded-2xl rounded-tl-sm shadow';
+
+            const title = document.createElement('div');
+            title.className = 'font-semibold text-sm text-amber-600 mb-2';
+            title.textContent = 'Sign not found in dataset. Showing best available video.';
+            bubble.appendChild(title);
+
+            if (availableWords && availableWords.length) {
+                const avail = document.createElement('div');
+                avail.className = 'text-xs text-slate-600 mb-3';
+                avail.textContent = 'Available words: ' + availableWords.join(', ');
+                bubble.appendChild(avail);
+            }
+
+            const missingLabel = document.createElement('div');
+            missingLabel.className = 'text-xs text-slate-700 font-medium mb-3';
+            missingLabel.textContent = 'Referenced videos for missing words:';
+            bubble.appendChild(missingLabel);
+
+            const list = document.createElement('div');
+            list.className = 'space-y-4';
+
+            missingItems.forEach(item => {
+                const itemContainer = document.createElement('div');
+                itemContainer.className = 'border-l-4 border-amber-400 pl-3 space-y-2';
+
+                // Word label
+                const word = document.createElement('span');
+                word.className = 'px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium inline-block';
+                word.textContent = item.word || 'unknown';
+                itemContainer.appendChild(word);
+
+                // Show ASL label if using fallback
+                if (item.youtube_using_asl) {
+                    const aslLabel = document.createElement('span');
+                    aslLabel.className = 'ml-2 px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium inline-block';
+                    aslLabel.textContent = '(ASL)';
+                    itemContainer.appendChild(aslLabel);
+                }
+
+                // YouTube embed iframe
+                if (item.youtube_embed) {
+                    const embedContainer = document.createElement('div');
+                    embedContainer.className = 'mt-2 rounded-lg overflow-hidden shadow-sm bg-black';
+                    
+                    const iframe = document.createElement('iframe');
+                    iframe.src = item.youtube_embed;
+                    iframe.width = '100%';
+                    iframe.height = '220';
+                    iframe.frameBorder = '0';
+                    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                    iframe.allowFullscreen = true;
+                    iframe.style.display = 'block';
+                    
+                    embedContainer.appendChild(iframe);
+                    itemContainer.appendChild(embedContainer);
+                    
+                    // Show video title if available
+                    if (item.youtube_title) {
+                        const videoTitle = document.createElement('div');
+                        videoTitle.className = 'text-xs text-slate-600 italic mt-1';
+                        videoTitle.textContent = `Video: ${item.youtube_title}`;
+                        itemContainer.appendChild(videoTitle);
+                    }
+                } else if (item.youtube_embed_error) {
+                    // Show error message if API key not configured
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'mt-2 p-2 rounded-md bg-yellow-50 text-yellow-700 text-xs';
+                    errorMsg.textContent = item.youtube_embed_error;
+                    itemContainer.appendChild(errorMsg);
+                }
+
+                // Fallback embed if primary not available (hidden by default)
+                if (item.youtube_fallback_embed && item.youtube_embed !== item.youtube_fallback_embed) {
+                    const fallbackContainer = document.createElement('div');
+                    fallbackContainer.id = `fallback-${item.word}`;
+                    fallbackContainer.className = 'mt-2 rounded-lg overflow-hidden shadow-sm bg-black hidden';
+                    
+                    const fallbackIframe = document.createElement('iframe');
+                    fallbackIframe.src = item.youtube_fallback_embed;
+                    fallbackIframe.width = '100%';
+                    fallbackIframe.height = '220';
+                    fallbackIframe.frameBorder = '0';
+                    fallbackIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                    fallbackIframe.allowFullscreen = true;
+                    fallbackIframe.style.display = 'block';
+                    
+                    fallbackContainer.appendChild(fallbackIframe);
+                    itemContainer.appendChild(fallbackContainer);
+                }
+
+                // Links section (hidden by default, expandable)
+                const linksContainer = document.createElement('div');
+                linksContainer.id = `links-${item.word}`;
+                linksContainer.className = 'hidden text-xs space-x-1 flex flex-wrap gap-1';
+
+                if (item.youtube_link) {
+                    const y = document.createElement('a');
+                    y.href = item.youtube_link;
+                    y.target = '_blank';
+                    y.rel = 'noopener';
+                    y.className = 'inline-block px-2 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs';
+                    y.textContent = 'YouTube Search';
+                    linksContainer.appendChild(y);
+                }
+
+                if (item.google_link) {
+                    const g = document.createElement('a');
+                    g.href = item.google_link;
+                    g.target = '_blank';
+                    g.rel = 'noopener';
+                    g.className = 'inline-block px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs';
+                    g.textContent = 'Google Search';
+                    linksContainer.appendChild(g);
+                }
+
+                if (linksContainer.children.length > 0) {
+                    // Toggle button for links
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.className = 'px-2 py-1 rounded-md bg-gray-400 hover:bg-gray-500 text-white text-xs mt-1 cursor-pointer';
+                    toggleBtn.textContent = 'Show search links';
+                    toggleBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const links = document.getElementById(`links-${item.word}`);
+                        links.classList.toggle('hidden');
+                        toggleBtn.textContent = links.classList.contains('hidden') ? 'Show search links' : 'Hide search links';
+                    });
+                    itemContainer.appendChild(toggleBtn);
+                    itemContainer.appendChild(linksContainer);
+                }
+
+                list.appendChild(itemContainer);
+            });
+
+            bubble.appendChild(list);
+            wrapper.appendChild(bubble);
+            chat.appendChild(wrapper);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        uploadBtn.addEventListener('click', () => {
+            if (!requireAuth()) return;
             fileInput.click();
         });
+
+        cameraBtn.addEventListener('click', () => {
+            openCamera();
+        });
+
+        const newChatBtn = document.getElementById('new-chat-btn');
+        if (newChatBtn) {
+            newChatBtn.addEventListener('click', createNewConversation);
+        }
 
         textToSignBtn.addEventListener('click', () => {
             const text = textInput.value.trim();
@@ -508,57 +1619,251 @@
             fileInput.value = '';
         });
 
-        // Optional: in-page camera modal capture
+        loginBtn.addEventListener('click', showAuthModal);
+        logoutBtn.addEventListener('click', doLogout);
+        dashboardBtn.addEventListener('click', () => {
+            if (!requireAuth()) return;
+            window.location.href = '/dashboard/';
+        });
+        dictionaryBtn.addEventListener('click', () => {
+            if (!requireAuth()) return;
+            window.location.href = '/dictionary';
+        });
+        closeAuth.addEventListener('click', hideAuthModal);
+
+        authModal.addEventListener('click', (e) => {
+            if (e.target === authModal) {
+                hideAuthModal();
+            }
+        });
+
+        tabLogin.addEventListener('click', () => {
+            tabLogin.className = 'flex-1 py-2 rounded-lg bg-slate-800 text-white text-sm';
+            tabSignup.className = 'flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm';
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        });
+
+        tabSignup.addEventListener('click', () => {
+            tabSignup.className = 'flex-1 py-2 rounded-lg bg-slate-800 text-white text-sm';
+            tabLogin.className = 'flex-1 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm';
+            signupForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        if (toggleLoginPasswordBtn && loginPassword && toggleLoginPasswordIcon) {
+            toggleLoginPasswordBtn.addEventListener('click', () => {
+                const isHidden = loginPassword.type === 'password';
+                loginPassword.type = isHidden ? 'text' : 'password';
+                toggleLoginPasswordIcon.className = isHidden ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+                toggleLoginPasswordBtn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+                toggleLoginPasswordBtn.setAttribute('title', isHidden ? 'Hide password' : 'Show password');
+            });
+        }
+
+        // ===== Enter Key Handlers for Login & Signup =====
+        /**
+         * Handle Enter key press in login inputs
+         * Triggers login when both username and password are filled
+         */
+        function handleLoginKeyPress(event) {
+            if (event.key === 'Enter' && event.ctrlKey === false) {
+                event.preventDefault();
+                const username = loginUsername.value.trim();
+                const password = loginPassword.value.trim();
+                if (username && password) {
+                    doLogin();
+                }
+            }
+        }
+
+        /**
+         * Handle Enter key press in signup inputs
+         * Triggers signup when all required fields are filled
+         */
+        function handleSignupKeyPress(event) {
+            if (event.key === 'Enter' && event.ctrlKey === false) {
+                event.preventDefault();
+                const username = signupUsername.value.trim();
+                const password = signupPassword.value.trim();
+                if (username && password) {
+                    doSignup();
+                }
+            }
+        }
+
+        // Attach Enter key listeners to login inputs
+        loginUsername.addEventListener('keypress', handleLoginKeyPress);
+        loginPassword.addEventListener('keypress', handleLoginKeyPress);
+
+        if (modeSelect) {
+            modeSelect.addEventListener('change', updateModeStatusLabel);
+            updateModeStatusLabel();
+        }
+
+        // Attach Enter key listeners to signup inputs
+        signupUsername.addEventListener('keypress', handleSignupKeyPress);
+        signupPassword.addEventListener('keypress', handleSignupKeyPress);
+        signupEmail.addEventListener('keypress', handleSignupKeyPress);
+
+        loginSubmit.addEventListener('click', doLogin);
+        signupSubmit.addEventListener('click', doSignup);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+        });
+
+        // Camera modal functions
         async function openCamera() {
+            if (!requireAuth()) return;
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }, 
+                    audio: false 
+                });
                 videoEl.srcObject = mediaStream;
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             } catch (e) {
-                alert('Camera access denied');
+                alert('Camera access denied or not available. Please use file upload instead.');
+                console.error('Camera error:', e);
             }
         }
 
         function closeCamera() {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            
+            // Stop media stream
             if (mediaStream) {
                 mediaStream.getTracks().forEach(t => t.stop());
                 mediaStream = null;
             }
+            
+            // Stop recording if active
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                try {
+                    mediaRecorder.stop();
+                } catch (e) {
+                    console.error('Error stopping recorder:', e);
+                }
+            }
+            
+            // Reset UI
+            videoEl.srcObject = null;
+            isRecording = false;
+            recBtn.innerHTML = '<i class="fa-solid fa-video"></i> <span class="ml-1">Record Video</span>';
+            recBtn.className = 'flex-1 bg-blue-100 text-blue-700 rounded-md py-2 hover:bg-blue-200 transition-colors';
         }
 
+        // Close modal handlers
         closeModal.addEventListener('click', closeCamera);
+        
+        // Close on backdrop click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCamera();
+            }
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeCamera();
+            }
+        });
 
         snapBtn.addEventListener('click', async () => {
-            if (!mediaStream) await openCamera();
-            const track = mediaStream.getVideoTracks()[0];
-            const settings = track.getSettings();
-            canvas.width = settings.width || 640;
-            canvas.height = settings.height || 480;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-            canvas.toBlob((blob) => { if (blob) sendFile(new File([blob], 'capture.jpg', { type: 'image/jpeg' })); }, 'image/jpeg');
+            if (!mediaStream) {
+                await openCamera();
+                return;
+            }
+            
+            try {
+                const track = mediaStream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                canvas.width = settings.width || 1280;
+                canvas.height = settings.height || 720;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+                
+                canvas.toBlob((blob) => { 
+                    if (blob) {
+                        sendFile(new File([blob], 'capture.jpg', { type: 'image/jpeg' }));
+                        closeCamera();
+                    }
+                }, 'image/jpeg', 0.95);
+            } catch (e) {
+                console.error('Capture error:', e);
+                addBubble('❌ Error capturing image. Please try again.');
+            }
         });
 
         recBtn.addEventListener('click', async () => {
-            if (!mediaStream) await openCamera();
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                recBtn.innerHTML = '<i class="fa-solid fa-video"></i> <span class="ml-1">Record</span>';
+            if (!mediaStream) {
+                await openCamera();
                 return;
             }
-            chunks = [];
-            mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                sendFile(new File([blob], 'capture.webm', { type: 'video/webm' }));
-            };
-            mediaRecorder.start();
-            recBtn.innerHTML = '<i class="fa-solid fa-stop"></i> <span class="ml-1">Stop</span>';
-            setTimeout(() => { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 5000);
+            
+            try {
+                if (isRecording && mediaRecorder && mediaRecorder.state === 'recording') {
+                    // Stop recording
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    recBtn.innerHTML = '<i class="fa-solid fa-video"></i> <span class="ml-1">Record Video</span>';
+                    recBtn.className = 'flex-1 bg-blue-100 text-blue-700 rounded-md py-2 hover:bg-blue-200 transition-colors';
+                    return;
+                }
+                
+                // Start recording
+                chunks = [];
+                const options = { mimeType: 'video/webm' };
+                
+                // Check if webm is supported, fallback to mp4
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'video/mp4';
+                }
+                
+                mediaRecorder = new MediaRecorder(mediaStream, options);
+                
+                mediaRecorder.ondataavailable = (e) => { 
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    if (chunks.length > 0) {
+                        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'video/webm' });
+                        const filename = mediaRecorder.mimeType.includes('webm') ? 'capture.webm' : 'capture.mp4';
+                        sendFile(new File([blob], filename, { type: mediaRecorder.mimeType || 'video/webm' }));
+                        closeCamera();
+                    }
+                    chunks = [];
+                };
+                
+                mediaRecorder.onerror = (e) => {
+                    console.error('Recording error:', e);
+                    addBubble('❌ Error recording video. Please try again.');
+                    isRecording = false;
+                    recBtn.innerHTML = '<i class="fa-solid fa-video"></i> <span class="ml-1">Record Video</span>';
+                    recBtn.className = 'flex-1 bg-blue-100 text-blue-700 rounded-md py-2 hover:bg-blue-200 transition-colors';
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                recBtn.innerHTML = '<i class="fa-solid fa-stop"></i> <span class="ml-1">Stop Recording</span>';
+                recBtn.className = 'flex-1 bg-red-500 text-white rounded-md py-2 hover:bg-red-600 transition-colors';
+                
+            } catch (e) {
+                console.error('Recording error:', e);
+                addBubble('❌ Error starting recording. Please try again.');
+                isRecording = false;
+            }
         });
     </script>
 </body>

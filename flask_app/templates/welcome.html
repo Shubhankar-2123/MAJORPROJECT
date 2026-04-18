@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome - SignAI</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { font-family: var(--font-family); }
+        .title-font { font-family: inherit; }
+        .hero-bg {
+            background: #F5F7FA;
+        }
+        .glass {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+        .fade-in { animation: fadeIn 0.6s ease-out both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="min-h-screen hero-bg text-slate-900">
+    <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg">🤟</div>
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div class="font-semibold text-lg" style="line-height: 1.2;">SignAI</div>
+                <div class="text-xs text-slate-500" style="line-height: 1.2;">Welcome tour</div>
+            </div>
+        </div>
+        <button id="skip-btn" class="text-xs px-4 py-2 rounded-full bg-slate-100 hover:bg-slate-200">Skip</button>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-10">
+        <section class="grid lg:grid-cols-2 gap-8 items-center">
+            <div class="fade-in">
+                <h1 class="title-font text-4xl lg:text-5xl leading-tight mb-4">
+                    Guided sign translation, built for clarity
+                </h1>
+                <p class="text-slate-600 mb-6">
+                    This system recognizes static hand signs, dynamic gestures, and converts text into sign videos.
+                    It runs offline-first, with optional AI assistance for sentence simplification.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                    <button id="continue-btn" class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+                        Continue to App
+                    </button>
+                    <a href="/dictionary" class="px-6 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 font-semibold hover:bg-slate-50">
+                        Explore Dictionary
+                    </a>
+                </div>
+            </div>
+            <div class="grid gap-4">
+                <div class="glass rounded-2xl p-5 fade-in">
+                    <div class="text-xs uppercase tracking-widest text-slate-500">Vocabulary</div>
+                    <div class="text-3xl font-bold">{{ vocab_count }}</div>
+                    <div class="text-sm text-slate-600">Total available signs in your dataset</div>
+                </div>
+                <div class="glass rounded-2xl p-5 fade-in">
+                    <div class="text-xs uppercase tracking-widest text-slate-500">How it works</div>
+                    <ol class="text-sm text-slate-600 mt-2 space-y-1">
+                        <li>1. Upload image/video or type a sentence</li>
+                        <li>2. System matches full sentence first</li>
+                        <li>3. If missing, smart simplifier finds core words</li>
+                        <li>4. Missing words show safe reference links</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-10">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="title-font text-2xl">Demo preview</h2>
+                <span class="text-xs text-slate-500">Sample signs from your dataset</span>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4">
+                {% for item in preview_items %}
+                <div class="glass rounded-2xl p-4">
+                    <div class="text-sm font-semibold mb-2">{{ item.word }} <span class="text-xs text-slate-500">({{ item.type }})</span></div>
+                    <video src="{{ item.url }}" controls class="rounded-xl w-full max-h-48 bg-slate-100"></video>
+                </div>
+                {% endfor %}
+                {% if preview_items|length == 0 %}
+                <div class="glass rounded-2xl p-4 text-sm text-slate-600">
+                    No preview videos available yet. Add signs to see them here.
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function markWelcomeSeen() {
+            try {
+                await fetch('/welcome/seen', { method: 'POST' });
+            } catch (_) {}
+        }
+        document.getElementById('continue-btn').addEventListener('click', async () => {
+            await markWelcomeSeen();
+            window.location.href = '/app';
+        });
+        document.getElementById('skip-btn').addEventListener('click', async () => {
+            await markWelcomeSeen();
+            window.location.href = '/app';
+        });
+    </script>
+</body>
+</html>

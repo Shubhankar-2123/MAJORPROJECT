@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SignAI Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { background-color: #F5F7FA; }
+    </style>
+</head>
+<body>
+    <nav class="navbar sticky top-0 z-40">
+        <div class="container flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; display: flex; align-items: center; justify-content: center; font-size: 20px;">🤟</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 18px; color: #1F2937;">SignAI Dashboard</div>
+                    <div style="font-size: 12px; color: #9CA3AF;">Prediction history & feedback</div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <a href="/customize" class="btn btn-primary btn-sm">
+                    🎬 Custom Signs
+                </a>
+                <a href="/app" class="btn btn-secondary btn-sm">
+                    🏠 Back to App
+                </a>
+                <button id="logout-btn" class="btn btn-danger btn-sm">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: 32px 0;">
+        <div style="display: grid; gap: 32px;">
+            <!-- Predictions Section -->
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <h2 style="font-size: 20px; font-weight: 600; color: #1F2937; margin: 0;">Recent Predictions</h2>
+                    <button id="refresh-predictions" class="btn btn-secondary btn-sm">
+                        Refresh
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Prediction</th>
+                                <th>Translated</th>
+                                <th>Confidence</th>
+                                <th>Model</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictions-body"></tbody>
+                    </table>
+                </div>
+                <div id="predictions-empty" class="alert alert-info" style="display: none; margin-top: 16px;">No predictions yet.</div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                    <h2 style="font-size: 20px; font-weight: 600; color: #1F2937; margin: 0;">Feedback History</h2>
+                    <button id="refresh-feedback" class="btn btn-secondary btn-sm">
+                        Refresh
+                    </button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Original</th>
+                                <th>Correction</th>
+                                <th>Processed</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedback-body"></tbody>
+                    </table>
+                </div>
+                <div id="feedback-empty" class="alert alert-info" style="display: none; margin-top: 16px;">No feedback yet.</div>
+            </div>
+        </div>
+    </main>
+
+    <div id="logout-modal" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px;">
+        <div class="card" style="width: 100%; max-width: 420px; border-radius: 20px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);">
+            <h2 style="font-size: 24px; font-weight: 700; color: #1F2937; margin-bottom: 8px;">Confirm Logout</h2>
+            <p style="color: #4A6080; margin-bottom: 24px;">Are you sure you want to logout?</p>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button id="logout-confirm-btn" class="btn btn-sm" style="background: #FFFFFF; color: #2563EB; border: 1px solid #BFDBFE; box-shadow: none;">
+                    Yes
+                </button>
+                <button id="logout-cancel-btn" class="btn btn-sm" style="background: #2563EB; color: #FFFFFF; border: 1px solid #2563EB; box-shadow: none;">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const predictionsBody = document.getElementById('predictions-body');
+        const predictionsEmpty = document.getElementById('predictions-empty');
+        const feedbackBody = document.getElementById('feedback-body');
+        const feedbackEmpty = document.getElementById('feedback-empty');
+        const refreshPredictions = document.getElementById('refresh-predictions');
+        const refreshFeedback = document.getElementById('refresh-feedback');
+        const logoutBtn = document.getElementById('logout-btn');
+        const logoutModal = document.getElementById('logout-modal');
+        const logoutConfirmBtn = document.getElementById('logout-confirm-btn');
+        const logoutCancelBtn = document.getElementById('logout-cancel-btn');
+
+        function row(text) {
+            const td = document.createElement('td');
+            td.style.paddingTop = '12px';
+            td.style.paddingBottom = '12px';
+            td.style.paddingRight = '16px';
+            td.textContent = text || '-';
+            return td;
+        }
+
+        async function loadPredictions() {
+            predictionsBody.innerHTML = '';
+            predictionsEmpty.style.display = 'none';
+            try {
+                const res = await fetch('/api/predictions/history?limit=50');
+                const data = await res.json();
+                const items = (data && data.predictions) || [];
+                if (!items.length) {
+                    predictionsEmpty.style.display = 'block';
+                    return;
+                }
+                items.forEach(p => {
+                    const tr = document.createElement('tr');
+                    tr.appendChild(row(p.created_at_display || p.created_at));
+                    tr.appendChild(row(p.input_type));
+                    tr.appendChild(row(p.predicted_text));
+                    tr.appendChild(row(p.translated_text));
+                    tr.appendChild(row(typeof p.confidence === 'number' ? (p.confidence * 100).toFixed(1) + '%' : p.confidence));
+                    tr.appendChild(row(p.model_used));
+                    predictionsBody.appendChild(tr);
+                });
+            } catch (e) {
+                predictionsEmpty.textContent = 'Unable to load predictions.';
+                predictionsEmpty.style.display = 'block';
+            }
+        }
+
+        async function loadFeedback() {
+            feedbackBody.innerHTML = '';
+            feedbackEmpty.style.display = 'none';
+            try {
+                const res = await fetch('/feedback/history');
+                const data = await res.json();
+                const items = (data && data.feedbacks) || [];
+                if (!items.length) {
+                    feedbackEmpty.style.display = 'block';
+                    return;
+                }
+                items.forEach(f => {
+                    const tr = document.createElement('tr');
+                    tr.appendChild(row(f.created_at));
+                    tr.appendChild(row(f.original_text));
+                    tr.appendChild(row(f.correction_text));
+                    tr.appendChild(row(f.processed ? 'Yes' : 'No'));
+                    feedbackBody.appendChild(tr);
+                });
+            } catch (e) {
+                feedbackEmpty.textContent = 'Unable to load feedback.';
+                feedbackEmpty.style.display = 'block';
+            }
+        }
+
+        function openLogoutModal() {
+            logoutModal.style.display = 'flex';
+        }
+
+        function closeLogoutModal() {
+            logoutModal.style.display = 'none';
+        }
+
+        async function doLogout() {
+            try {
+                await fetch('/auth/logout', { method: 'POST' });
+            } catch (_) {}
+            window.location.href = '/';
+        }
+
+        refreshPredictions.addEventListener('click', loadPredictions);
+        refreshFeedback.addEventListener('click', loadFeedback);
+        logoutBtn.addEventListener('click', openLogoutModal);
+        logoutConfirmBtn.addEventListener('click', doLogout);
+        logoutCancelBtn.addEventListener('click', closeLogoutModal);
+        logoutModal.addEventListener('click', (e) => {
+            if (e.target === logoutModal) {
+                closeLogoutModal();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && logoutModal.style.display === 'flex') {
+                closeLogoutModal();
+            }
+        });
+
+        loadPredictions();
+        loadFeedback();
+    </script>
+</body>
+</html>

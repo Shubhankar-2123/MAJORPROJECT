@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dictionary - SignAI</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body { font-family: var(--font-family); }
+        .title-font { font-family: inherit; }
+        .bg-mist {
+            background: #F5F7FA;
+        }
+        .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); }
+    </style>
+</head>
+<body class="min-h-screen bg-mist">
+    <header class="bg-white/90 backdrop-blur border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">📘</div>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <div class="title-font text-xl" style="line-height: 1.2;">Dataset Dictionary</div>
+                    <div class="text-xs text-slate-500" style="line-height: 1.2;">Preview system + custom signs</div>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <a href="/customize" class="btn btn-primary btn-sm">
+                    🎬 Custom Signs
+                </a>
+                <a href="/app" class="btn btn-secondary btn-sm">Back to App</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        <section class="grid gap-4 md:grid-cols-3 items-center">
+            <div class="md:col-span-2">
+                <h1 class="title-font text-3xl mb-2">Search your available signs</h1>
+                <p class="text-slate-600 text-sm">Browse words and sentences, preview video clips, and discover dataset coverage.</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow">
+                <div class="text-xs text-slate-500 uppercase tracking-widest">Vocabulary size</div>
+                <div id="vocab-count" class="text-3xl font-bold text-blue-600">0</div>
+            </div>
+        </section>
+
+        <section class="mt-6 flex flex-wrap items-center gap-3">
+            <div class="flex-1 min-w-[240px]">
+                <input id="search-input" type="text" placeholder="Search word or sentence..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+            </div>
+            <select id="source-filter" class="px-4 py-3 rounded-xl border border-slate-200 form-select">
+                <option value="all">All Sources</option>
+                <option value="system">System</option>
+                <option value="user">User</option>
+            </select>
+        </section>
+
+        <section class="mt-6 space-y-8">
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="title-font text-2xl">Words</h2>
+                    <span id="word-count" class="text-xs text-slate-500"></span>
+                </div>
+                <div id="word-cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="word-empty" class="text-sm text-slate-500 mt-4 hidden">No matching words found.</div>
+                <button id="word-more" type="button" class="mt-4 px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 hidden">More Words</button>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="title-font text-2xl">Sentences</h2>
+                    <span id="sentence-count" class="text-xs text-slate-500"></span>
+                </div>
+                <div id="sentence-cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <div id="sentence-empty" class="text-sm text-slate-500 mt-4 hidden">No matching sentences found.</div>
+                <button id="sentence-more" type="button" class="mt-4 px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 hidden">More Sentences</button>
+            </div>
+
+            <div id="empty" class="text-sm text-slate-500 hidden">No matching entries found.</div>
+        </section>
+    </main>
+
+    <div id="preview-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl mx-4 overflow-hidden" onclick="event.stopPropagation()">
+            <div class="px-4 py-3 border-b flex items-center justify-between">
+                <div class="font-semibold" id="modal-title">Preview</div>
+                <button id="close-modal" class="text-slate-500 hover:text-slate-700">Close</button>
+            </div>
+            <div class="p-4">
+                <video id="modal-video" class="w-full rounded-xl bg-black/70" controls></video>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wordCards = document.getElementById('word-cards');
+        const sentenceCards = document.getElementById('sentence-cards');
+        const wordCount = document.getElementById('word-count');
+        const sentenceCount = document.getElementById('sentence-count');
+        const wordEmpty = document.getElementById('word-empty');
+        const sentenceEmpty = document.getElementById('sentence-empty');
+        const wordMore = document.getElementById('word-more');
+        const sentenceMore = document.getElementById('sentence-more');
+        const empty = document.getElementById('empty');
+        const searchInput = document.getElementById('search-input');
+        const sourceFilter = document.getElementById('source-filter');
+        const vocabCount = document.getElementById('vocab-count');
+        const previewModal = document.getElementById('preview-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalVideo = document.getElementById('modal-video');
+        const closeModal = document.getElementById('close-modal');
+
+        const INITIAL_VISIBLE = 5;
+        const LOAD_STEP = 5;
+
+        let allEntries = [];
+        let filteredEntries = [];
+        const visibleCounts = { word: INITIAL_VISIBLE, sentence: INITIAL_VISIBLE };
+
+        function openModal(entry) {
+            modalTitle.textContent = `${entry.word} (${entry.type})`;
+            modalVideo.src = entry.url;
+            previewModal.classList.remove('hidden');
+            previewModal.classList.add('flex');
+        }
+
+        function closePreview() {
+            modalVideo.pause();
+            modalVideo.src = '';
+            previewModal.classList.add('hidden');
+            previewModal.classList.remove('flex');
+        }
+
+        function createCard(entry) {
+            const card = document.createElement('div');
+            card.className = 'card bg-white rounded-2xl p-4 shadow cursor-pointer';
+
+            const badge = entry.source === 'user'
+                ? '<span class="text-xs px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">User</span>'
+                : '<span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">System</span>';
+
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-2">
+                    <div class="font-semibold text-lg">${entry.word}</div>
+                    ${badge}
+                </div>
+                <div class="text-xs text-slate-500 mb-3">Type: ${entry.type}</div>
+                <video src="${entry.url}" class="rounded-xl w-full max-h-40 bg-black/60" muted></video>
+                <div class="mt-3 text-xs text-blue-700">Click to preview</div>
+            `;
+
+            card.addEventListener('click', () => openModal(entry));
+            return card;
+        }
+
+        function renderSection(type, entries, container, emptyState, countEl, moreBtn) {
+            container.innerHTML = '';
+            emptyState.classList.add('hidden');
+
+            const visible = Math.min(visibleCounts[type], entries.length);
+            const visibleEntries = entries.slice(0, visible);
+            visibleEntries.forEach(entry => container.appendChild(createCard(entry)));
+
+            countEl.textContent = `${entries.length} total`;
+
+            if (!entries.length) {
+                emptyState.classList.remove('hidden');
+                moreBtn.classList.add('hidden');
+                return;
+            }
+
+            if (visible < entries.length) {
+                moreBtn.classList.remove('hidden');
+                moreBtn.textContent = `More ${type === 'word' ? 'Words' : 'Sentences'}`;
+            } else {
+                moreBtn.classList.add('hidden');
+            }
+        }
+
+        function render(entries) {
+            const words = entries
+                .filter(entry => entry.type === 'word')
+                .sort((a, b) => a.word.localeCompare(b.word));
+            const sentences = entries
+                .filter(entry => entry.type === 'sentence')
+                .sort((a, b) => a.word.localeCompare(b.word));
+
+            renderSection('word', words, wordCards, wordEmpty, wordCount, wordMore);
+            renderSection('sentence', sentences, sentenceCards, sentenceEmpty, sentenceCount, sentenceMore);
+
+            if (!entries.length) {
+                empty.classList.remove('hidden');
+            } else {
+                empty.classList.add('hidden');
+            }
+        }
+
+        function applyFilters() {
+            const query = (searchInput.value || '').toLowerCase().trim();
+            const sourceVal = sourceFilter.value;
+
+            filteredEntries = allEntries.filter(entry => {
+                const matchesQuery = !query || entry.word.toLowerCase().includes(query);
+                const matchesSource = sourceVal === 'all' || entry.source === sourceVal;
+                return matchesQuery && matchesSource;
+            });
+
+            visibleCounts.word = INITIAL_VISIBLE;
+            visibleCounts.sentence = INITIAL_VISIBLE;
+            render(filteredEntries);
+        }
+
+        async function loadDictionary() {
+            try {
+                const res = await fetch('/api/dictionary');
+                const data = await res.json();
+                if (!res.ok) {
+                    empty.textContent = data.error || 'Unable to load dictionary.';
+                    empty.classList.remove('hidden');
+                    return;
+                }
+                allEntries = data.entries || [];
+                vocabCount.textContent = data.count || allEntries.length || 0;
+                filteredEntries = [...allEntries];
+                render(filteredEntries);
+            } catch (e) {
+                empty.textContent = 'Unable to load dictionary.';
+                empty.classList.remove('hidden');
+            }
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        sourceFilter.addEventListener('change', applyFilters);
+        wordMore.addEventListener('click', () => {
+            visibleCounts.word += LOAD_STEP;
+            render(filteredEntries);
+        });
+        sentenceMore.addEventListener('click', () => {
+            visibleCounts.sentence += LOAD_STEP;
+            render(filteredEntries);
+        });
+        closeModal.addEventListener('click', closePreview);
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) closePreview();
+        });
+
+        loadDictionary();
+    </script>
+</body>
+</html>

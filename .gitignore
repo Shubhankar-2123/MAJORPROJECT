@@ -1,19 +1,49 @@
-# Virtual environment
-mp-env/
-
-# Jupyter checkpoints
-.ipynb_checkpoints/
-
-# Large datasets or archives
-*.zip
-*.npy
-
-# Python caches
+# Python runtime
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# OS files
-.DS_Store
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Notebook and editor artifacts
+.ipynb_checkpoints/
+Untitled*.ipynb
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Local databases and runtime data
+*.db
+*.sqlite
+*.sqlite3
+data/app.db
+*.db-journal
+
+# Generated or local-only uploads
+uploads/
+flask_app/uploads/
+data/custom_signs/
+
+# Generated processing outputs
+data/processed/
+data_keypoints/*.npy
+data_keypoints/*.pkl
+
+# Temporary debug helpers
+debug_users.py
+reset_password.py
+inference_test.py
+scripts/debug_word_predictions.py
+
+# OS artifacts
 Thumbs.db
-
-data/
+.DS_Store

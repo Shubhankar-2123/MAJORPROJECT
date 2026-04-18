@@ -1,0 +1,28 @@
+Classification Report
+
+                                       precision    recall  f1-score   support
+
+            i am sitting in the class       1.00      1.00      1.00         8
+           i am so sorry to hear that       1.00      0.88      0.93         8
+            i am suffering from fever       1.00      0.88      0.93         8
+                           i am tired       1.00      1.00      1.00         9
+                      i am very happy       1.00      1.00      1.00         7
+             i can not help you there       1.00      1.00      1.00         9
+                       i do not agree       0.89      1.00      0.94         8
+                     i do not like it       0.64      1.00      0.78         9
+                     i do not mean it       0.56      0.56      0.56         9
+                         i dont agree       0.00      0.00      0.00         1
+                      i enjoyed a lot       1.00      1.00      1.00        10
+                           i got hurt       0.75      0.75      0.75         8
+                i like you i love you       1.00      0.60      0.75        10
+                         i need water       0.86      0.75      0.80         8
+                            i promise       1.00      0.89      0.94         9
+               i really appreciate it       0.83      0.62      0.71         8
+       i somehow got to know about it       0.90      1.00      0.95         9
+            i was stopped by some one       0.50      0.88      0.64         8
+it does not make any difference to me       1.00      0.88      0.93         8
+        it was nice chatting with you       1.00      0.88      0.93         8
+
+                             accuracy                           0.86       162
+                            macro avg       0.85      0.83      0.83       162
+                         weighted avg       0.89      0.86      0.87       162

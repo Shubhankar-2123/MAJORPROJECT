@@ -1,0 +1,26 @@
+Classification Report
+
+                 precision    recall  f1-score   support
+
+           COMB       1.00      1.00      1.00         7
+           COME       1.00      1.00      1.00         7
+CONGRATULATIONS       1.00      0.86      0.92         7
+         CRYING       0.67      1.00      0.80         8
+           DARE       1.00      1.00      1.00         7
+     DIFFERENCE       0.75      0.86      0.80         7
+        DILEMMA       0.89      1.00      0.94         8
+   DISAPPOINTED       1.00      1.00      1.00         7
+             DO       0.75      0.43      0.55         7
+     DON_T CARE       0.83      0.71      0.77         7
+          ENJOY       0.64      1.00      0.78         7
+         FAVOUR       0.89      0.89      0.89         9
+          FEVER       1.00      0.44      0.62         9
+           FINE       0.88      1.00      0.93         7
+           FOOD       1.00      1.00      1.00         7
+           FREE       0.75      0.86      0.80         7
+         FRIEND       0.86      0.86      0.86         7
+           FROM       1.00      0.71      0.83         7
+
+       accuracy                           0.86       132
+      macro avg       0.88      0.87      0.86       132
+   weighted avg       0.88      0.86      0.86       132

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Customization</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+</head>
+<body class="bg-slate-50">
+    <!-- Header -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">
+                Custom Sign Customization
+            </h1>
+            <div class="space-x-4">
+                <a href="/custom-signs/" class="text-slate-600 hover:text-slate-900">📋 Manage</a>
+                <a href="/dashboard" class="text-slate-600 hover:text-slate-900">🏠 Home</a>
+                <a href="/logout" class="text-red-600 hover:text-red-900">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        {% if error %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <p class="text-red-800">{{ error }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Category Tabs -->
+        <div class="mb-6 bg-white rounded-lg shadow-sm">
+            <div class="flex flex-wrap border-b">
+                <button class="category-tab px-6 py-4 font-medium text-slate-600 border-b-2 border-transparent hover:text-blue-600 active:border-blue-600 transition" data-category="words">
+                    Words
+                </button>
+                <button class="category-tab px-6 py-4 font-medium text-slate-600 border-b-2 border-transparent hover:text-blue-600 active:border-blue-600 transition" data-category="sentences">
+                    Sentences
+                </button>
+                <button class="category-tab px-6 py-4 font-medium text-slate-600 border-b-2 border-transparent hover:text-blue-600 active:border-blue-600 transition" data-category="letters">
+                    Letters
+                </button>
+                <button class="category-tab px-6 py-4 font-medium text-slate-600 border-b-2 border-transparent hover:text-blue-600 active:border-blue-600 transition" data-category="numbers">
+                    Numbers
+                </button>
+            </div>
+        </div>
+
+        <!-- Two-Panel Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- LEFT PANEL: Reference & Selection -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-6">
+                    <i class="fa-solid fa-eye mr-2 text-blue-600"></i>Reference
+                </h2>
+
+                <!-- Category Display -->
+                <div id="category-info" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <p class="text-sm text-slate-600">
+                        <i class="fa-solid fa-info-circle mr-2"></i>
+                        <span id="category-description">Single or multi-word phrases</span>
+                    </p>
+                </div>
+
+                <!-- Vocabulary Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Select or Search <span class="text-blue-600 font-bold" id="vocab-label">Word</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="search-vocab" 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Search..."
+                        >
+                        <i class="fa-solid fa-search text-slate-400 absolute right-3 top-3"></i>
+                    </div>
+                </div>
+
+                <!-- Vocabulary Dropdown -->
+                <div class="mb-6">
+                    <select id="vocab-select" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 form-select">
+                        <option value="">Loading vocabulary...</option>
+                    </select>
+                </div>
+
+                <!-- Reference Media Display -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 mb-3">Watch the default sign:</label>
+                    <div id="reference-media" class="bg-slate-900 rounded-lg overflow-hidden aspect-video flex items-center justify-center mb-4">
+                        <div class="text-center text-slate-400">
+                            <i class="fa-solid fa-play text-4xl mb-2"></i>
+                            <p>Reference will appear here</p>
+                        </div>
+                    </div>
+
+                    <!-- Reference Controls -->
+                    <div class="flex gap-2">
+                        <button id="replay-btn" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-redo mr-2"></i>Replay
+                        </button>
+                        <button id="slow-motion-btn" class="flex-1 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-forward mr-2"></i>Slow Motion
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instruction -->
+                <div class="p-4 bg-amber-50 border-l-4 border-amber-400 rounded">
+                    <p class="text-sm text-amber-800">
+                        <i class="fa-solid fa-lightbulb mr-2"></i>
+                        <strong>Tip:</strong> Watch carefully and replicate the gesture on your camera or upload a pre-recorded video.
+                    </p>
+                </div>
+            </div>
+
+            <!-- RIGHT PANEL: Upload & Validation -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-bold text-slate-800 mb-6">
+                    <i class="fa-solid fa-upload mr-2 text-blue-600"></i>Upload Your Sign
+                </h2>
+
+                <!-- Selected Word Display -->
+                <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm text-slate-600">You are customizing:</p>
+                    <p class="text-2xl font-bold text-blue-700" id="selected-word">No item selected</p>
+                </div>
+
+                <!-- Upload Options -->
+                <div class="mb-6">
+                    <fieldset id="upload-options" class="space-y-3">
+                        <legend class="text-sm font-medium text-slate-700 mb-3">Upload Method</legend>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="upload-method" value="file" checked class="w-4 h-4">
+                            <span class="text-slate-700">📁 Upload from file</span>
+                        </label>
+                        
+                        <label class="flex items-center gap-3 cursor-pointer" id="camera-option" style="display: none;">
+                            <input type="radio" name="upload-method" value="camera" class="w-4 h-4">
+                            <span class="text-slate-700">🎥 Record with camera</span>
+                        </label>
+                    </fieldset>
+                </div>
+
+                <!-- File Upload Area -->
+                <div id="file-upload-section" class="mb-6">
+                    <div id="upload-dropzone" class="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-400 mb-3 block"></i>
+                        <p class="text-slate-700 font-medium mb-1">Drag and drop your file</p>
+                        <p class="text-sm text-slate-500 mb-3">or</p>
+                        <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                            Choose File
+                        </button>
+                        <p class="text-xs text-slate-500 mt-3" id="file-hint">MP4, MOV, AVI up to 50 MB</p>
+                        <input type="file" id="file-input" class="hidden" accept="video/*,.mp4,.mov,.avi,.webm,.mkv,.m4v">
+                    </div>
+
+                    <!-- Selected File Display -->
+                    <div id="file-preview" class="mt-4 hidden">
+                        <p class="text-sm text-slate-600 mb-2">Selected file:</p>
+                        <div class="flex items-center justify-between p-3 bg-slate-100 rounded-lg">
+                            <span id="file-name" class="text-sm font-medium text-slate-800"></span>
+                            <button type="button" id="clear-file" class="text-red-600 hover:text-red-900">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera Capture Section (Hidden) -->
+                <div id="camera-section" class="mb-6 hidden">
+                    <div class="bg-slate-100 rounded-lg p-4 border border-slate-200">
+                        <p class="text-sm text-slate-600 mb-3">Use your camera to capture a sign.</p>
+                        <button type="button" id="open-camera-btn" class="w-full px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 font-medium">
+                            <i class="fa-solid fa-camera mr-2"></i>Open Camera
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Verification (Required) -->
+                <div class="mb-6 border-t pt-4">
+                    <div class="flex items-center gap-2 text-sm text-slate-700 font-medium">
+                        <i class="fa-solid fa-shield-check text-blue-600"></i>
+                        AI verification is required before saving.
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">
+                        Record or upload your sign to validate it automatically. Upload unlocks only after a successful match.
+                    </p>
+                </div>
+
+                <!-- Upload Message -->
+                <div id="upload-message" class="mb-4 p-4 rounded-lg hidden"></div>
+
+                <!-- Upload Button -->
+                <button type="button" id="upload-btn" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-upload mr-2"></i>Upload Custom Sign
+                </button>
+
+                <!-- Status Messages -->
+                <div id="status-messages" class="mt-4 space-y-2"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- AI Verification Status -->
+    <div class="max-w-7xl mx-auto px-4 pb-8">
+        <div id="verification-panel" class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-800">AI Verification Status</h3>
+                <span id="verification-badge" class="text-xs px-3 py-1 rounded-full bg-slate-100 text-slate-600">Waiting</span>
+            </div>
+            <div id="verification-message" class="mt-3 text-sm text-slate-700">
+                Select a word and record or upload your sign to start validation.
+            </div>
+            <div id="verification-details" class="mt-2 text-xs text-slate-500"></div>
+        </div>
+    </div>
+
+    <!-- Camera Modal (shared capture flow) -->
+    <div id="camera-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+        <div class="bg-white w-full max-w-md rounded-xl overflow-hidden shadow-xl mx-4" onclick="event.stopPropagation()">
+            <div class="px-4 py-3 border-b flex items-center justify-between">
+                <div class="font-semibold">Capture Sign Language</div>
+                <button id="close-camera-modal" class="text-gray-500 hover:text-gray-700 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-4 space-y-3">
+                <video id="cam" class="w-full rounded-lg bg-black" autoplay playsinline muted></video>
+                <canvas id="canvas" class="hidden"></canvas>
+                <div class="flex gap-2">
+                    <button id="snap" class="flex-1 bg-blue-600 text-white rounded-md py-2 hover:bg-blue-700 transition-colors"><i class="fa-solid fa-camera"></i> <span class="ml-1">Capture Image</span></button>
+                    <button id="rec" class="flex-1 bg-blue-100 text-blue-700 rounded-md py-2 hover:bg-blue-200 transition-colors"><i class="fa-solid fa-video"></i> <span class="ml-1" id="rec-text">Record Video</span></button>
+                </div>
+                <div class="text-xs text-gray-500 text-center">Tip: Keep signs centered and well-lit. Record 2-5 seconds for best results.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let selectedCategory = 'words';
+        let selectedVocab = null;
+        let currentVocabulary = [];
+        let customSigns = {{ custom_signs | tojson }};
+        let mediaBlob = null;
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let chunks = [];
+        let isRecording = false;
+        let validating = false;
+        let validationOk = false;
+        let lastValidation = null;
+        let validationRequestId = 0;
+
+        // Category configuration
+        const categoryConfig = {
+            words: { label: 'Word', mediaType: 'video', hint: 'MP4, MOV, AVI up to 50 MB' },
+            sentences: { label: 'Sentence', mediaType: 'video', hint: 'MP4, MOV, AVI up to 50 MB' },
+            letters: { label: 'Letter', mediaType: 'image', hint: 'JPG, PNG up to 10 MB' },
+            numbers: { label: 'Number', mediaType: 'image', hint: 'JPG, PNG up to 10 MB' }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupTabListeners();
+            setupVocabSearch();
+            setupUploadArea();
+            await loadVocabulary('words');
+            updateUploadOptions('words');
+            resetValidation('Select a word and record or upload your sign to start validation.');
+        });
+
+        // Setup category tabs
+        function setupTabListeners() {
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', async (e) => {
+                    const category = e.currentTarget.dataset.category;
+                    setActiveTab(category);
+                    selectedCategory = category;
+                    selectedVocab = null;
+                    document.getElementById('selected-word').textContent = 'No item selected';
+                    document.getElementById('search-vocab').value = '';
+                    await loadVocabulary(category);
+                    updateUploadOptions(category);
+                    updateReferenceSectionText();
+                    resetValidation('Select a word and record or upload your sign to start validation.');
+                });
+            });
+        }
+
+        function setActiveTab(category) {
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                if (tab.dataset.category === category) {
+                    tab.classList.add('border-b-2', 'border-blue-600', 'text-blue-600');
+                    tab.classList.remove('border-transparent', 'text-slate-600');
+                } else {
+                    tab.classList.remove('border-b-2', 'border-blue-600', 'text-blue-600');
+                    tab.classList.add('border-transparent', 'text-slate-600');
+                }
+            });
+        }
+
+        // Load vocabulary
+        async function loadVocabulary(category) {
+            try {
+                const response = await fetch(`/custom-signs/api/vocabulary/${category}`);
+                const data = await response.json();
+                if (data.success) {
+                    currentVocabulary = data.vocabulary || [];
+                    populateVocabSelect(currentVocabulary);
+                }
+            } catch (error) {
+                console.error('Error loading vocabulary:', error);
+            }
+        }
+
+        function populateVocabSelect(vocab) {
+            const select = document.getElementById('vocab-select');
+            select.innerHTML = '<option value="">-- Select an item --</option>' +
+                vocab.map(item => `<option value="${item}">${item}</option>`).join('');
+        }
+
+        // Search functionality
+        function setupVocabSearch() {
+            const search = document.getElementById('search-vocab');
+            search.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                const filtered = currentVocabulary.filter(v => v.toLowerCase().includes(query));
+                populateVocabSelect(filtered);
+            });
+
+            document.getElementById('vocab-select').addEventListener('change', async (e) => {
+                selectedVocab = e.target.value;
+                if (selectedVocab) {
+                    document.getElementById('selected-word').textContent = selectedVocab;
+                    await loadReferenceMedia(selectedCategory, selectedVocab);
+                    triggerValidation();
+                }
+            });
+        }
+
+        // Update reference section text
+        function updateReferenceSectionText() {
+            const config = categoryConfig[selectedCategory] || {};
+            const desc = {
+                words: 'Single or multi-word phrases',
+                sentences: 'Complete sentences',
+                letters: 'A-Z alphabet',
+                numbers: '0-9 digits'
+            }[selectedCategory];
+            document.getElementById('category-description').textContent = desc;
+            document.getElementById('vocab-label').textContent = config.label || 'Item';
+        }
+
+        // Load reference media
+        async function loadReferenceMedia(category, item) {
+            try {
+                const response = await fetch(`/custom-signs/api/reference/${category}/${encodeURIComponent(item)}`);
+                const data = await response.json();
+                
+                if (data.success && data.found) {
+                    const media = document.getElementById('reference-media');
+                    if (data.media_type === 'video') {
+                        media.innerHTML = `<video width="100%" height="100%" controls style="background: black;">
+                            <source src="${data.path}" type="video/mp4">
+                            Your browser does not support video tag.
+                        </video>`;
+                    } else {
+                        media.innerHTML = `<img src="${data.path}" alt="${item}" class="w-full h-full object-cover">`;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading reference:', error);
+            }
+        }
+
+        // Update upload options based on category
+        function updateUploadOptions(category) {
+            const mediaType = categoryConfig[category]?.mediaType;
+            const cameraOption = document.getElementById('camera-option');
+            const fileHint = document.getElementById('file-hint');
+            const fileInput = document.getElementById('file-input');
+
+            if (mediaType === 'video') {
+                cameraOption.style.display = 'flex';
+                fileHint.textContent = 'MP4, MOV, AVI up to 50 MB';
+                fileInput.accept = 'video/*,.mp4,.mov,.avi,.webm,.mkv,.m4v';
+            } else {
+                cameraOption.style.display = 'none';
+                document.querySelector('input[name="upload-method"][value="file"]').checked = true;
+                fileHint.textContent = 'JPG, PNG up to 10 MB';
+                fileInput.accept = 'image/*,.jpg,.jpeg,.png';
+            }
+            resetValidation('Select a word and record or upload your sign to start validation.');
+        }
+
+        // Setup upload area
+        function setupUploadArea() {
+            const dropzone = document.getElementById('upload-dropzone');
+            const fileInput = document.getElementById('file-input');
+            const filePreview = document.getElementById('file-preview');
+            const fileName = document.getElementById('file-name');
+            const clearBtn = document.getElementById('clear-file');
+
+            // Upload method toggle
+            document.querySelectorAll('input[name="upload-method"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const fileSection = document.getElementById('file-upload-section');
+                    const cameraSection = document.getElementById('camera-section');
+                    if (e.target.value === 'camera') {
+                        fileSection.classList.add('hidden');
+                        cameraSection.classList.remove('hidden');
+                    } else {
+                        fileSection.classList.remove('hidden');
+                        cameraSection.classList.add('hidden');
+                    }
+                });
+            });
+
+            // File upload
+            dropzone.addEventListener('click', () => fileInput.click());
+            
+            function setSelectedFile(file) {
+                mediaBlob = file;
+                fileName.textContent = file.name;
+                filePreview.classList.remove('hidden');
+                triggerValidation();
+            }
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    setSelectedFile(e.target.files[0]);
+                }
+            });
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('border-blue-500', 'bg-blue-50');
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('border-blue-500', 'bg-blue-50');
+                if (e.dataTransfer.files.length > 0) {
+                    setSelectedFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                mediaBlob = null;
+                fileInput.value = '';
+                filePreview.classList.add('hidden');
+                resetValidation('Select a word and record or upload your sign to start validation.');
+            });
+
+            window.__setSelectedFile = setSelectedFile;
+        }
+
+        function setUploadEnabled(enabled) {
+            const uploadBtn = document.getElementById('upload-btn');
+            uploadBtn.disabled = !enabled;
+        }
+
+        function setVerificationStatus(state, message, details) {
+            const badge = document.getElementById('verification-badge');
+            const msg = document.getElementById('verification-message');
+            const det = document.getElementById('verification-details');
+
+            const styles = {
+                idle: 'bg-slate-100 text-slate-600',
+                validating: 'bg-blue-100 text-blue-700',
+                pass: 'bg-blue-100 text-blue-700',
+                fail: 'bg-red-100 text-red-700',
+                warn: 'bg-amber-100 text-amber-700'
+            };
+
+            const labels = {
+                idle: 'Waiting',
+                validating: 'Validating',
+                pass: 'Verified',
+                fail: 'Not Verified',
+                warn: 'Needs Attention'
+            };
+
+            badge.className = `text-xs px-3 py-1 rounded-full ${styles[state] || styles.idle}`;
+            badge.textContent = labels[state] || labels.idle;
+            msg.textContent = message || '';
+            det.textContent = details || '';
+        }
+
+        function resetValidation(message) {
+            validating = false;
+            validationOk = false;
+            lastValidation = null;
+            setUploadEnabled(false);
+            setVerificationStatus('idle', message || 'Select a word and record or upload your sign to start validation.', '');
+        }
+
+        async function triggerValidation() {
+            if (!selectedVocab || !mediaBlob) {
+                resetValidation('Select a word and record or upload your sign to start validation.');
+                return;
+            }
+
+            if (!['words', 'sentences'].includes(selectedCategory)) {
+                validationOk = false;
+                setUploadEnabled(false);
+                setVerificationStatus(
+                    'warn',
+                    'Image verification is not available yet.',
+                    'Please use Words or Sentences to validate with AI.'
+                );
+                return;
+            }
+
+            validating = true;
+            setUploadEnabled(false);
+            setVerificationStatus('validating', 'Running AI verification on your sign...', '');
+
+            const currentRequest = ++validationRequestId;
+            const formData = new FormData();
+            formData.append('word', selectedVocab);
+            formData.append('video', mediaBlob);
+            formData.append('enable_validation', 'true');
+
+            try {
+                const response = await fetch('/custom-signs/validate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (currentRequest !== validationRequestId) {
+                    return;
+                }
+
+                if (!response.ok || !data.success) {
+                    validationOk = false;
+                    setVerificationStatus('fail', data.error || 'Verification failed.', 'Please re-record your sign.');
+                    return;
+                }
+
+                const validation = data.validation || {};
+                const confidence = typeof validation.confidence === 'number' ? (validation.confidence * 100).toFixed(1) + '%' : 'N/A';
+                const prediction = validation.prediction || 'Unknown';
+                const details = `Predicted: ${prediction} | Confidence: ${confidence}`;
+
+                if (validation.valid) {
+                    validationOk = true;
+                    setVerificationStatus('pass', validation.message || 'Sign verified successfully.', details);
+                    setUploadEnabled(true);
+                } else {
+                    validationOk = false;
+                    setVerificationStatus('fail', validation.message || 'Sign does not match selected word.', details);
+                }
+            } catch (error) {
+                if (currentRequest !== validationRequestId) {
+                    return;
+                }
+                validationOk = false;
+                setVerificationStatus('fail', 'Verification failed. Please try again.', error.message || '');
+            } finally {
+                if (currentRequest === validationRequestId) {
+                    validating = false;
+                }
+            }
+        }
+
+        // Upload handler
+        document.getElementById('upload-btn').addEventListener('click', async () => {
+            if (!selectedVocab) {
+                showMessage('Please select an item first', 'error');
+                return;
+            }
+
+            if (!mediaBlob) {
+                showMessage('Please select or record a file', 'error');
+                return;
+            }
+
+            if (!validationOk) {
+                showMessage('AI verification is required before upload.', 'error');
+                return;
+            }
+
+            const uploadBtn = document.getElementById('upload-btn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Uploading...';
+
+            const formData = new FormData();
+            formData.append('word', selectedVocab);
+            formData.append('category', selectedCategory);
+
+            if (['words', 'sentences'].includes(selectedCategory)) {
+                formData.append('video', mediaBlob);
+            } else {
+                formData.append('image', mediaBlob);
+            }
+
+            formData.append('skip_validation', 'false');
+            formData.append('strict_validation', 'true');
+
+            try {
+                const response = await fetch('/custom-signs/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage(data.message, 'success');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    showMessage(data.error || 'Upload failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error: ' + error.message, 'error');
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fa-solid fa-upload mr-2"></i>Upload Custom Sign';
+            }
+        });
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('upload-message');
+            msgDiv.textContent = msg;
+            msgDiv.className = `p-4 rounded-lg ${type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' : 'bg-green-50 border border-green-200 text-green-800'}`;
+            msgDiv.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

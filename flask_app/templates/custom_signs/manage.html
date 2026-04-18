@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Custom Signs - SignAI</title>
+    <link rel="stylesheet" href="/static/css/tailwind.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" /> -->
+</head>
+<body class="min-h-screen bg-slate-100">
+    <header class="bg-white shadow-md px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center">🤟</div>
+            <div>
+                <div class="font-semibold text-lg">My Custom Signs</div>
+                <div class="text-xs text-slate-500">Upload and manage your personal sign videos</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/customize" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm">
+                🎬 Custom Signs
+            </a>
+            <a href="/app" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm">
+                🏠 Back to App
+            </a>
+            <button id="logout-btn" class="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="p-6 space-y-6 max-w-6xl mx-auto">
+        
+        <!-- Upload Section -->
+        <section class="bg-white rounded-2xl shadow p-6">
+            <h2 class="text-xl font-semibold mb-4">
+                Upload Custom Sign
+            </h2>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p class="text-sm text-blue-800">
+                    <strong>How it works:</strong> Upload your own sign video for any word. Your custom video will replace the default one when you use Text → Sign.
+                </p>
+            </div>
+            
+            <form id="upload-form" class="space-y-4">
+                <div>
+                    <label for="word-input" class="block text-sm font-medium text-slate-700 mb-2">
+                        Word / Phrase
+                    </label>
+                    <input 
+                        type="text" 
+                        id="word-input" 
+                        name="word" 
+                        required 
+                        maxlength="100"
+                        placeholder="e.g., hello, thank you, good morning"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                </div>
+                
+                <div>
+                    <label for="video-input" class="block text-sm font-medium text-slate-700 mb-2">
+                        Video File (MP4, MOV, AVI, WebM)
+                    </label>
+                    <input 
+                        type="file" 
+                        id="video-input" 
+                        name="video" 
+                        accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska,video/x-m4v"
+                        required
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <p class="text-xs text-slate-500 mt-1">Maximum file size: 50 MB</p>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    id="upload-btn"
+                    class="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition"
+                >
+                    Upload Custom Sign
+                </button>
+            </form>
+            
+            <div id="upload-message" class="mt-4 hidden"></div>
+            
+            <!-- Optional: ML Validation Settings -->
+            <div class="mt-6 border-t pt-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="enable-validation" class="w-5 h-5 rounded">
+                    <span class="text-sm font-medium text-slate-700">Verify video with AI (Optional)</span>
+                </label>
+                <p class="text-xs text-slate-500 mt-2 ml-8">
+                    Our AI will check that your video matches the word you specified. If enabled, your upload may take longer.
+                </p>
+                
+                <!-- Validation Mode Selection -->
+                <div id="validation-options" class="ml-8 mt-3 hidden space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="validation-mode" value="advisory" checked class="w-4 h-4">
+                        <span class="text-sm text-slate-600">📋 Advisory (warn but allow)</span>
+                    </label>
+                    <p class="text-xs text-slate-500 ml-6 mb-2">Upload succeeds even if AI has concerns, but you'll get feedback.</p>
+                    
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="validation-mode" value="strict" class="w-4 h-4">
+                        <span class="text-sm text-slate-600">🔒 Strict (require high confidence)</span>
+                    </label>
+                    <p class="text-xs text-slate-500 ml-6">Upload only succeeds if AI is very confident it matches the word.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Custom Signs List -->
+        <section class="bg-white rounded-2xl shadow p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold">
+                    <i class="fa-solid fa-video mr-2 text-blue-600"></i>Your Custom Signs
+                    <span id="signs-count" class="text-sm font-normal text-slate-500 ml-2">({{ custom_signs|length }})</span>
+                </h2>
+                <button id="refresh-btn" class="text-sm px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">
+                    <i class="fa-solid fa-sync-alt mr-1"></i>Refresh
+                </button>
+            </div>
+            
+            <div id="custom-signs-container">
+                {% if custom_signs and custom_signs|length > 0 %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for sign in custom_signs %}
+                    <div class="border border-slate-200 rounded-lg p-4 hover:shadow-md transition" data-sign-id="{{ sign.id }}">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-slate-800 capitalize">{{ sign.word }}</h3>
+                            <button 
+                                class="delete-btn text-red-500 hover:text-red-700 text-sm"
+                                data-sign-id="{{ sign.id }}"
+                                data-word="{{ sign.word }}"
+                            >
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        
+                        <video 
+                            controls 
+                            class="w-full rounded-lg bg-black mb-3"
+                            style="max-height: 200px;"
+                        >
+                            <source src="/custom-signs/video/{{ sign.user_id }}/{{ sign.word }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <div class="text-xs text-slate-500">
+                            <div><i class="fa-regular fa-clock mr-1"></i>{{ sign.created_at }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-12">
+                    <i class="fa-solid fa-video text-6xl text-slate-300 mb-4"></i>
+                    <p class="text-slate-500">No custom signs yet. Upload your first one above!</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Enable/disable validation options
+        document.getElementById('enable-validation').addEventListener('change', (e) => {
+            document.getElementById('validation-options').classList.toggle('hidden', !e.target.checked);
+        });
+        
+        // Upload form handler
+        document.getElementById('upload-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const uploadBtn = document.getElementById('upload-btn');
+            const messageDiv = document.getElementById('upload-message');
+            
+            // Disable button
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Uploading...';
+            messageDiv.className = 'mt-4 hidden';
+            
+            const formData = new FormData(e.target);
+            
+            // Add validation settings
+            const enableValidation = document.getElementById('enable-validation').checked;
+            const validationMode = document.querySelector('input[name="validation-mode"]:checked')?.value || 'advisory';
+            
+            if (enableValidation) {
+                formData.append('skip_validation', 'false');
+                formData.append('strict_validation', validationMode === 'strict' ? 'true' : 'false');
+            } else {
+                formData.append('skip_validation', 'true');
+            }
+            
+            try {
+                // If validation is enabled, first validate, then upload
+                if (enableValidation) {
+                    const validateBtn = uploadBtn.cloneNode(true);
+                    validateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Verifying with AI...';
+                    validateBtn.disabled = true;
+                    uploadBtn.parentNode.replaceChild(validateBtn, uploadBtn);
+                    
+                    // Create validation form data
+                    const validateData = new FormData();
+                    validateData.append('word', formData.get('word'));
+                    validateData.append('video', formData.get('video'));
+                    validateData.append('enable_validation', 'true');
+                    
+                    // Validate first
+                    const validateRes = await fetch('/custom-signs/validate', {
+                        method: 'POST',
+                        body: validateData
+                    });
+                    
+                    const validateResult = await validateRes.json();
+                    
+                    if (!validateResult.success) {
+                        messageDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800';
+                        messageDiv.innerHTML = `<i class="fa-solid fa-exclamation-circle mr-2"></i>${validateResult.error || 'Validation failed'}`;
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fa-solid fa-upload mr-2"></i>Upload Custom Sign';
+                        return;
+                    }
+                    
+                    const validation = validateResult.validation || {};
+                    
+                    // Show validation feedback
+                    const feedbackDiv = document.createElement('div');
+                    feedbackDiv.className = `mt-3 p-4 rounded-lg ${validation.valid ? 'bg-green-50 border border-green-200 text-green-800' : 'bg-yellow-50 border border-yellow-200 text-yellow-800'}`;
+                    feedbackDiv.innerHTML = `
+                        <div class="font-medium mb-2">${validation.valid ? '✅ Validation Passed' : '⚠️ Validation Warning'}</div>
+                        <div class="text-sm">${validation.message}</div>
+                        <div class="text-xs mt-2 opacity-75">Detected: <strong>${validation.prediction}</strong> (${(validation.confidence * 100).toFixed(1)}% confidence)</div>
+                        ${!validation.valid && validationMode === 'advisory' ? '<div class="text-xs mt-2">💡 You can still upload - this is just feedback.</div>' : ''}
+                    `;
+                    messageDiv.parentNode.insertBefore(feedbackDiv, messageDiv);
+                    
+                    // If strict mode and invalid, stop here
+                    if (validationMode === 'strict' && !validation.valid) {
+                        messageDiv.className = 'mt-4 hidden';
+                        uploadBtn.disabled = false;
+                        uploadBtn.innerHTML = '<i class="fa-solid fa-upload mr-2"></i>Upload Custom Sign';
+                        return;
+                    }
+                    
+                    // Continue with actual upload
+                    uploadBtn = validateBtn;
+                    uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Saving...';
+                }
+                
+                const response = await fetch('/custom-signs/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    messageDiv.className = 'mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800';
+                    messageDiv.innerHTML = `<i class="fa-solid fa-check-circle mr-2"></i>${data.message}`;
+                    
+                    // Reset form
+                    e.target.reset();
+                    document.getElementById('enable-validation').checked = false;
+                    document.getElementById('validation-options').classList.add('hidden');
+                    
+                    // Refresh list after 1 second
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    messageDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800';
+                    messageDiv.innerHTML = `<i class="fa-solid fa-exclamation-circle mr-2"></i>${data.error || 'Upload failed'}`;
+                }
+            } catch (error) {
+                messageDiv.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800';
+                messageDiv.innerHTML = `<i class="fa-solid fa-exclamation-circle mr-2"></i>Network error: ${error.message}`;
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fa-solid fa-upload mr-2"></i>Upload Custom Sign';
+            }
+        });
+        
+        // Delete button handlers
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('.delete-btn')) {
+                const btn = e.target.closest('.delete-btn');
+                const signId = btn.dataset.signId;
+                const word = btn.dataset.word;
+                
+                if (!confirm(`Are you sure you want to delete the custom sign for "${word}"?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/custom-signs/delete/${signId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        // Remove the card from UI
+                        const card = document.querySelector(`[data-sign-id="${signId}"]`);
+                        if (card) {
+                            card.remove();
+                        }
+                        
+                        // Check if list is empty now
+                        const container = document.getElementById('custom-signs-container');
+                        const cards = container.querySelectorAll('[data-sign-id]');
+                        if (cards.length === 0) {
+                            container.innerHTML = `
+                                <div class="text-center py-12">
+                                    <i class="fa-solid fa-video text-6xl text-slate-300 mb-4"></i>
+                                    <p class="text-slate-500">No custom signs yet. Upload your first one above!</p>
+                                </div>
+                            `;
+                        }
+                        
+                        // Update count
+                        const countEl = document.getElementById('signs-count');
+                        if (countEl) {
+                            const currentCount = parseInt(countEl.textContent.match(/\d+/)[0]);
+                            countEl.textContent = `(${currentCount - 1})`;
+                        }
+                    } else {
+                        alert(`Error: ${data.error || 'Failed to delete'}`);
+                    }
+                } catch (error) {
+                    alert(`Network error: ${error.message}`);
+                }
+            }
+        });
+        
+        // Refresh button
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            window.location.reload();
+        });
+        
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        });
+    </script>
+</body>
+</html>

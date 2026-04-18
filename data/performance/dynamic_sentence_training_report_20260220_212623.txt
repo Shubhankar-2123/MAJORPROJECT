@@ -1,0 +1,23 @@
+Classification Report
+
+                                    precision    recall  f1-score   support
+
+                    i do not agree       1.00      0.83      0.91         6
+         i was stopped by some one       1.00      1.00      1.00         6
+            that is so kind of you       1.00      1.00      1.00         7
+                 what do you think       1.00      1.00      1.00         4
+         when will the train leave       1.00      1.00      1.00         7
+  which collegeschool are you from       0.86      0.86      0.86         7
+                       who are you       1.00      1.00      1.00         6
+                 why are you angry       0.88      1.00      0.93         7
+                why are you crying       1.00      0.62      0.77         8
+          why are you disappointed       0.78      1.00      0.88         7
+                       you are bad       1.00      1.00      1.00         7
+                      you are good       0.86      1.00      0.92         6
+                   you are welcome       1.00      0.50      0.67         6
+    you do anything, i do not care       0.67      1.00      0.80         6
+you need a medicine, take this one       0.88      0.88      0.88         8
+
+                          accuracy                           0.91        98
+                         macro avg       0.93      0.91      0.91        98
+                      weighted avg       0.93      0.91      0.90        98

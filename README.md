@@ -1,165 +1,343 @@
-# Sign Language Recognition Project
+# Sign Language Recognition and Translation System
 
-This repository hosts a Flask-based application and supporting scripts for static (image) and dynamic (video) sign recognition, plus utilities for dataset preprocessing and model training.
+A real-time Sign Language Recognition and Translation System built using Flask, OpenCV, MediaPipe, and Deep Learning techniques. The system recognizes static signs from images and dynamic signs from videos, translates them into text, and supports text-to-speech output to improve communication between sign language users and non-signers.
 
-## Setup
+---
 
-- Prerequisites
-  - Python 3.8–3.11 on Windows
-  - (Optional) NVIDIA GPU for faster inference with `torch`
-- Create and activate a virtual environment
-  - `python -m venv .venv`
-  - `.\.venv\Scripts\activate`
-- Install dependencies
-  - `pip install -r requirements.txt`
-- Run the web app
-  - `python flask_app/app.py`
-  - Opens on `http://127.0.0.1:5000` (login page)
+## Project Overview
 
-User manual
-- See [docs/USER_MANUAL.md](docs/USER_MANUAL.md) for a step-by-step guide to using the app.
+This project aims to bridge communication barriers by providing an AI-powered platform capable of recognizing sign language gestures in real time. The system supports both static hand signs and dynamic gestures representing words and sentences.
 
-Deployment verification
-- Follow [docs/DEPLOYMENT_VERIFICATION.md](docs/DEPLOYMENT_VERIFICATION.md) to validate a clean setup.
+The application includes user authentication, custom sign creation, sign dictionaries, feedback mechanisms, text-to-speech integration, and a modern web interface.
 
-## Deployment / Portability
+---
 
-The app is now configured to run from environment variables instead of machine-specific paths.
+## Key Features
 
-Recommended environment values:
-- `DATA_DIR` - root folder for datasets and media, defaults to `data/`
-- `MODELS_DIR` - root folder for model artifacts, defaults to `models/`
-- `USER_SIGNS_DIR` - custom sign storage, defaults to `data/custom_signs/`
-- `SECRET_KEY` - Flask session secret
-- `MAX_FRAMES`, `WORD_CONF_THRESHOLD`, `SENT_CONF_THRESHOLD`, `DYNAMIC_DEFAULT_THRESHOLD` - runtime tuning knobs
+### Recognition & Translation
 
-For local development, copy `.env.example` to `.env` and adjust the values as needed. For CI/CD or server deployment, set the same variables in the platform environment instead of editing code.
+* Static sign recognition from images
+* Dynamic sign recognition from videos
+* Word-level and sentence-level gesture recognition
+* Real-time prediction and translation
+* Confidence-based prediction filtering
 
-Deployment packaging guidance:
-- Keep `data/dynamic*` and `data/Frames_Word_Level_*` if you want the dictionary and media lookup to work.
-- Exclude `uploads/`, `flask_app/uploads/`, `.venv/`, `venv/`, `__pycache__/`, and notebook checkpoints from deploy bundles.
-- Do not ship local-only databases such as `data/app.db` unless that database is intentionally required.
+### User Features
 
-Environment knobs
-- `DYNAMIC_DEFAULT_THRESHOLD` (default `0.60`) – base confidence for dynamic models
-- `WORD_CONF_THRESHOLD` (default `0.55`) – word-level threshold
-- `SENT_CONF_THRESHOLD` (default `0.75`) – sentence-level threshold
+* User registration and authentication
+* User profile management
+* Dashboard for tracking usage
+* Custom sign creation and management
+* Interactive sign dictionary
 
-## Data Layout
+### Accessibility
 
-The app and scripts expect data under `data/`:
-- `data/static/` – static image classes (e.g., `A/`, `B/`, `1/`).
-- `data/dynamic*/` – one or more dynamic video datasets; subfolders are class labels, files are videos (`.mp4`, `.mov`, `.mkv`, `.avi`, `.webm`, `.m4v`).
-- `data_keypoints/` – extracted keypoint CSVs
-  - `static_keypoints.csv`
-  - `dynamic_keypoints.csv`
-- `data/processed/` – created by preprocessing scripts (npy splits, encoders, scaler)
+* Text-to-Speech (TTS) integration
+* Visual confidence feedback
+* User-friendly web interface
 
-Models
-- `models/static images/` – static models and artifacts
-  - `static_model.pth`
-  - `static_label_encoder.pkl`
-  - `static_scaler.pkl`
-- `models/words/` – word-level dynamic models and encoders
-- `models/sentences/` – sentence-level dynamic models and encoders
+### Machine Learning
 
-Key scripts
-- `scripts/preprocess_data.py` – build processed datasets and save encoders/scaler
-- `scripts/train_static_model.py` – train static image classifier
-- `scripts/train_dynamic_new.py` – train dynamic LSTM for videos (word-level)
+* Deep Learning based gesture classification
+* MediaPipe landmark extraction
+* Multi-model architecture for large vocabulary support
+* Dataset preprocessing and augmentation pipeline
 
-Utilities
-- `utils/preprocessing.py` – production preprocessing, with structured logging and robust temp-file handling
-- `utils/keypoints_extraction.py` – dataset keypoint extraction to CSVs
-- `utils/text_to_sign_service.py` – legacy text-to-sign mapping (not used by the Flask app)
+---
 
-## Training
+## Technologies Used
 
-Static (images)
-1. Ensure `data_keypoints/static_keypoints.csv` is generated (see keypoints script if needed).
-2. Build processed splits and artifacts:
-   - `python scripts/preprocess_data.py`
-   - Saves `static_label_encoder.pkl` and `static_scaler.pkl` into `data/processed/`.
-3. Train the static model:
-   - `python scripts/train_static_model.py`
-   - Outputs `models/static images/static_model.pth`.
+### Backend
 
-Dynamic (videos)
-1. Ensure videos exist under a word-level dataset (e.g., `data/Frames_Word_Level_2/<word>/*.mp4`).
-2. Train the dynamic model:
-   - `python scripts/train_dynamic_new.py`
-   - Saves model weights and label encoders under `models/`.
+* Python
+* Flask
 
-Notes
-- Normalization and keypoint extraction in `utils/preprocessing.py` matches training behavior to avoid distribution shift.
-- For reproducibility, keep preprocessing artifacts (scaler/encoders) consistent between train and inference.
+### Machine Learning & Computer Vision
 
-## API Routes
+* PyTorch
+* OpenCV
+* MediaPipe
+* NumPy
+* Pandas
+* Scikit-learn
 
-Base URL: `http://127.0.0.1:5000`
+### Database
 
-- GET `/`
-  - Redirects to `/login`.
+* SQLite
 
-- GET `/login`
-  - Renders `templates/login.html`.
+### Frontend
 
-- GET `/app`
-  - Renders `templates/index.html` (requires session).
+* HTML
+* CSS
+* JavaScript
+* Tailwind CSS
 
-- GET `/dashboard/`
-  - Renders `templates/dashboard.html` (requires session).
+### Development Tools
 
-- GET `/available_words`
-  - Scans `data/dynamic*` for word folders containing videos.
-  - Returns `{ "count": <int>, "words": [<str>, ...] }`.
+* Git
+* GitHub
+* VS Code
 
-- POST `/predict_static`
-  - Form-data: `image` (file)
-  - Returns `{ "prediction": <label> }` on success.
-  - On low confidence or errors, returns `{ "prediction": "unable to recognize" }`.
-  - Internals: uses scaler and static model under `models/static images/`.
-  - Requires authenticated session.
+---
 
-- POST `/predict_dynamic`
-  - Form-data: `video` (file)
-  - Returns `{ "prediction": <label> }` if confidence clears the per-model threshold.
-  - Otherwise `{ "prediction": "unable to recognize" }`.
-  - Requires authenticated session.
+## System Architecture
 
-- POST `/predict`
-  - Unified image/video prediction with translation + TTS.
-  - Requires authenticated session.
+### Static Sign Recognition Pipeline
 
-- GET `/api/session`
-  - Returns `{ logged_in: bool, user: { id, username } | null }`.
+Image Input
+→ MediaPipe Landmark Extraction
+→ Feature Preprocessing
+→ Static Classification Model
+→ Predicted Sign
 
-- POST `/debug/static_preprocess_check`
-  - Form-data: `image` (file)
-  - Returns shapes and sanity info: expected model input size, chosen scaler path, raw static keypoints size.
+### Dynamic Sign Recognition Pipeline
 
-- GET `/sanity/static`
-  - Runs a forward pass with zeros to validate static model wiring.
-  - Returns `{ "ok": true, ... }` or `{ "ok": false, "error": <msg> }`.
+Video Input
+→ Frame Extraction
+→ MediaPipe Landmark Extraction
+→ Sequence Processing
+→ Dynamic Classification Model
+→ Predicted Word / Sentence
 
-### Example Requests
+---
 
-- Static prediction (after login)
-  - `curl -X POST -F "image=@path/to/file.jpg" http://127.0.0.1:5000/predict_static`
+## Multi-Model Architecture
 
-- Dynamic prediction (after login)
-  - `curl -X POST -F "video=@path/to/file.mp4" http://127.0.0.1:5000/predict_dynamic`
+Due to the large size of the dynamic sign language dataset and hardware limitations during training, the system uses a multi-model architecture.
 
-- Available words
-  - `curl http://127.0.0.1:5000/available_words`
+Instead of training one large model, the dataset was divided into smaller subsets containing groups of words and sentences. Each subset was trained independently, producing specialized models and label encoders.
 
-## Logging & Errors
+During inference:
 
-- Preprocessing emits structured JSON logs via Python `logging` (events like `preprocess.static.start`, `video.open_failed`). Configure logging in your launcher if you want to capture them.
-- Clear errors are raised internally as `PreprocessError` with fields `code`, `message`, `details`. Flask handlers generally convert unexpected errors into `{ "prediction": "unable to recognize" }` responses.
+1. Input video is processed using MediaPipe.
+2. Keypoints are extracted and normalized.
+3. The routing system selects the appropriate model.
+4. The selected model performs prediction.
+5. The result is translated into text and optionally converted into speech.
 
-## Tips
+This architecture enabled support for a larger vocabulary while reducing memory and computation requirements during training.
 
-- File uploads: Streams are handled safely with per-request temp files to avoid collisions under concurrency.
-- GPU: If CUDA is available, `torch` uses it automatically; otherwise CPU is used.
-- Dataset paths: The app scans `data/dynamic*` recursively; organize word/sentence videos under those folders for discovery.
+---
+
+## Challenges Solved
+
+### Large Dataset Training
+
+The complete dataset could not be efficiently trained as a single model on available hardware.
+
+Solution:
+
+* Partitioned dataset into multiple groups
+* Trained specialized models for each group
+* Developed model routing logic during inference
+
+### Real-Time Processing
+
+Maintaining acceptable prediction speed while processing videos and extracting landmarks.
+
+Solution:
+
+* Optimized preprocessing pipeline
+* Reduced unnecessary frame processing
+* Used confidence-based filtering
+
+### Consistent Preprocessing
+
+Ensuring training and inference pipelines remained identical.
+
+Solution:
+
+* Shared preprocessing utilities
+* Saved encoders and scalers
+* Implemented reusable preprocessing services
+
+---
+
+## Project Structure
+
+```text
+SignLanguageRecognition/
+│
+├── app.py
+├── config.py
+├── requirements.txt
+│
+├── flask_app/
+├── routes/
+├── services/
+├── utils/
+├── templates/
+├── static/
+├── database/
+│
+├── models/
+│   ├── static/
+│   ├── words/
+│   ├── sentences/
+│   └── dynamic/
+│
+├── scripts/
+├── docs/
+│
+└── data_keypoints/
+```
+
+## Installation
+
+### Clone Repository
+
+```bash
+git clone <repository-url>
+cd SignLanguageRecognition
+```
+
+### Create Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate environment:
+
+Windows
+
+```bash
+.venv\Scripts\activate
+```
+
+### Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Running the Application
+
+```bash
+python app.py
+```
+
+Open:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+## Environment Configuration
+
+Create a `.env` file using the following variables:
+
+```env
+DATA_DIR=data/
+MODELS_DIR=models/
+USER_SIGNS_DIR=data/custom_signs/
+
+SECRET_KEY=your_secret_key
+
+MAX_FRAMES=30
+
+WORD_CONF_THRESHOLD=0.55
+SENT_CONF_THRESHOLD=0.75
+DYNAMIC_DEFAULT_THRESHOLD=0.60
+```
+
+---
+
+## Training Models
+
+### Static Model
+
+Generate preprocessing artifacts:
+
+```bash
+python scripts/preprocess_data.py
+```
+
+Train model:
+
+```bash
+python scripts/train_static_model.py
+```
+
+Output:
+
+```text
+models/static/static_model.pth
+```
+
+### Dynamic Model
+
+Train dynamic model:
+
+```bash
+python scripts/train_dynamic_new.py
+```
+
+Outputs:
+
+* Dynamic model weights
+* Label encoders
+* Training artifacts
+
+---
+
+## Available API Endpoints
+
+| Method | Endpoint         | Description             |
+| ------ | ---------------- | ----------------------- |
+| GET    | /                | Redirect to login       |
+| GET    | /login           | Login page              |
+| GET    | /app             | Main application        |
+| GET    | /dashboard       | User dashboard          |
+| POST   | /predict_static  | Static sign prediction  |
+| POST   | /predict_dynamic | Dynamic sign prediction |
+| POST   | /predict         | Unified prediction      |
+| GET    | /available_words | Available vocabulary    |
+| GET    | /api/session     | Session information     |
+
+---
+
+## Performance Considerations
+
+* Supports CPU and GPU execution
+* Automatic CUDA detection
+* Confidence threshold tuning
+* Structured logging for debugging
+* Safe file handling for concurrent requests
+
+---
+
+## Future Improvements
+
+* Transformer-based sequence models
+* Larger vocabulary support
+* Real-time webcam sentence recognition
+* Multilingual translation support
+* Mobile application deployment
+* Cloud-based inference API
+
+---
+
+## Documentation
+
+Additional documentation is available in:
+
+* docs/
+* CUSTOM_SIGNS_QUICKSTART.md
+* CUSTOM_SIGN_TECHNICAL_REFERENCE.md
+* IMPLEMENTATION_AUDIT.md
+* WORD_MODEL_CNN_LSTM_RETRAIN_GUIDE.md
+
+---
+
+## Author
+
+Shubhankar Sawant
+
+Bachelor of Engineering (Information Technology)
+
+Passionate about Software Development, Machine Learning, Computer Vision, and Building Real-World Applications.
